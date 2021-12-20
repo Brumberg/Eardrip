@@ -1,0 +1,74 @@
+.. Eardrip documentation master file, created by
+   sphinx-quickstart on Mon Dec 20 15:15:16 2021.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Welcome to Eardrip's documentation!
+===================================
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+|
+
+|
+
+Documentation
+=============
+
+|
+
+	This document gives a brief overview of all available modules   
+	
+|
+
+|
+
+The ``GenericWebServer`` class
+******************************
+.. autoclass:: WebServer.GenericWebServer
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+|
+
+|
+
+The ``HTTPWebServer`` class
+***************************
+.. autoclass:: WebServer.HTTPWebServer
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+|
+
+|
+
+The ``main`` module
+*******************
+.. autoclass:: main.MyServer
+    :members:
+    :undoc-members:
+    :show-inheritance:
+	
+| 
+
+|
+
+The ``main`` module
+*******************
+.. autofunction:: main.StartupServer
+
+|
+
+|
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
