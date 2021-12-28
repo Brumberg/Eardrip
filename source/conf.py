@@ -13,8 +13,9 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('.'))
-sys.path.insert(0, os.path.abspath('./WebServer'))
-sys.path.insert(0, os.path.abspath('../../'))
+sys.path.insert(0, os.path.abspath('../python/webserver'))
+sys.path.insert(0, os.path.abspath('../python/webpages'))
+sys.path.insert(0, os.path.abspath('../python/database'))
 sys.path.insert(0, os.path.abspath('../'))
 
 

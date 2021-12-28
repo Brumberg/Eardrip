@@ -27,7 +27,7 @@ Documentation
 
 The ``GenericWebServer`` class
 ******************************
-.. autoclass:: WebServer.GenericWebServer
+.. autoclass:: python.webserver.GenericWebServer
     :members:
     :undoc-members:
     :show-inheritance:
@@ -38,7 +38,7 @@ The ``GenericWebServer`` class
 
 The ``HTTPWebServer`` class
 ***************************
-.. autoclass:: WebServer.HTTPWebServer
+.. autoclass:: python.webserver.HTTPWebServer
     :members:
     :undoc-members:
     :show-inheritance:

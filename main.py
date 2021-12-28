@@ -1,5 +1,5 @@
 
-import WebServer
+import python.webserver
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import urllib.parse
 
@@ -9,20 +9,37 @@ class MyServer(BaseHTTPRequestHandler):
             :param -
             :return: -
             """
-        if self.path == '/':
-            self.path = './html/index.html'
-        else:
-            self.path = './html' + self.path
+        if self.path.endswith('.css'):
+            cssfilepath = '.' + self.path
+            try:
+                print(cssfilepath)
+                f = open(cssfilepath)
+                self.send_response(200)
+                self.send_header('Content-type', 'text/css')
+                self.end_headers()
+                csscontent = f.read()
+                f.close()
+                self.wfile.write(bytes(csscontent, 'utf-8'))
+            except:
+                file_to_open = "File Not Found"
+                self.send_response(404)
+                self.end_headers()
 
-        try:
-            print(self.path[0:])
-            file_to_open = open(self.path[0:]).read()
-            self.send_response(200)
-        except:
-            file_to_open = "File Not Found"
-            self.send_response(404)
-        self.end_headers()
-        self.wfile.write(bytes(file_to_open, 'utf-8'))
+        else:
+            if self.path == '/':
+                self.path = './html/index.html'
+            else:
+                self.path = './html' + self.path
+
+            try:
+                #print(self.path[0:])
+                file_to_open = open(self.path[0:]).read()
+                self.send_response(200)
+            except:
+                file_to_open = "File Not Found"
+                self.send_response(404)
+            self.end_headers()
+            self.wfile.write(bytes(file_to_open, 'utf-8'))
         return #BaseHTTPRequestHandler.do_GET(self)
 
     def do_POST(self):
@@ -52,7 +69,7 @@ def StartupServer():
         :param -
         :return: -
         """
-    server = WebServer.HTTPWebServer()
+    server = python.webserver.HTTPWebServer()
     server.Initialize("localhost", 8080)
     server.Start(MyServer)
 
