@@ -18,6 +18,42 @@
     </head>
 
     <body>
+		<script>
+		function validateForm() {
+			validateUser()
+			validatePassword()
+		}
+		
+		function validateUser() {
+			let x = document.forms["signupform"]["signup_userid"].value;
+			if (x == "") {
+				alert("Name must be filled out");
+				return false;
+			}
+			else if (x.length<5) {
+				alert("Name must consist of at least 5 letters");
+				return false;
+			}
+			else {
+				return true;
+			}
+		} 
+
+		function validatePassword() {
+			let x = document.forms["signupform"]["signup_passwordid"].value;
+			if (x == "") {
+				alert("Password must be filled in");
+				return false;
+			}
+			else if (x.length<5) {
+				alert("Password must consist of at least 5 letters");
+				return false;
+			}
+			else {
+				return true;
+			}
+		} 		
+		</script>
         <h1>
             <nav>
                 <!-- logo,login/sign up and profile navigation-->
@@ -39,17 +75,17 @@
                     <input type="login_password" placeholder="password . . ." />
                     <div class="login_password_check"><button>Check</button>
                 </div>
+				<form name="signupform" action="" onsubmit="return validateForm()" method="post">
+					<div class="signup">Sign Up
+						<input type="signup_username" name="signup_userid" id="signup_userid" value="" placeholder="username . . ." />
+						<div class="signup_username_check"><button>Check</button>
 
-                <div class="signup">Sign Up
-                    <input type="signup_username" placeholder="username . . ." />
-                    <div class="signup_username_check"><button>Check</button>
-
-                    <input type="signup_password" placeholder="password . . ." />
+						<input type="signup_password" name="signup_passwordid" id="signup_passwordid" value="" placeholder="password . . ." />
                         <div class="signup_password_check"><button>Check</button>
 
-                    <input type="email" placeholder="email . . ." />
-                </div>
-
+						<input type="email" placeholder="email . . ." />
+					</div>
+				</form>
             </div>
         </h1>
     </body>
