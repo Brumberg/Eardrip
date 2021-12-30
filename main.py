@@ -1,14 +1,18 @@
 
 import python.webserver
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler
 import urllib.parse
+from python.rema import remotedatabase as rema
+import python.tools.mulo as mulo
 
 class MyServer(BaseHTTPRequestHandler):
     def do_GET(self):
         """Displays the content of the (templated) web site
-            :param -
-            :return: -
-            """
+
+        :return: -
+        :rtype: -
+
+        """
         if self.path.endswith('.css'):
             cssfilepath = '.' + self.path
             try:
@@ -44,9 +48,11 @@ class MyServer(BaseHTTPRequestHandler):
 
     def do_POST(self):
         """Handles post requests of a web client. Extracts key value pairs of the request (has to be extended)
-            :param -
-            :return: -
-            """
+
+        :return: -
+        :rtype: -
+
+        """
         content_length = int(self.headers['Content-Length'])  # <--- Gets the size of data
         self.data_string = self.rfile.read(int(self.headers['Content-Length']))
         self.keyvalue = dict(urllib.parse.parse_qsl(self.data_string))
@@ -66,19 +72,34 @@ class MyServer(BaseHTTPRequestHandler):
 
 def StartupServer():
     """Starts the web server
-        :param -
+
         :return: -
+        :rtype: -
         """
     server = python.webserver.HTTPWebServer()
     server.Initialize("localhost", 8080)
     server.Start(MyServer)
 
+def StartupRema():
+    """Initializes spotify connection
+
+        :return: -
+        :rtype: -
+        """
+    spy = rema()
+    [a,b,c,d] = spy.GetAttributes()
+    for i,j,k,l in zip(a,b,c,d):
+        print(i, j, k, l)
+
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     """Entry point of the application
-        :param -
+
         :return: -
+        :rtype: -
         """
+    mulo.CreatePlayList('D:\Data\Music', 'Playlist.json', True)
+    StartupRema()
     StartupServer()
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/

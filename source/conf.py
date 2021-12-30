@@ -16,6 +16,8 @@ sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('../python/webserver'))
 sys.path.insert(0, os.path.abspath('../python/webpages'))
 sys.path.insert(0, os.path.abspath('../python/database'))
+sys.path.insert(0, os.path.abspath('../python/tools'))
+sys.path.insert(0, os.path.abspath('../python/rema'))
 sys.path.insert(0, os.path.abspath('../'))
 
 
@@ -39,6 +41,7 @@ extensions = [
    'sphinx.ext.doctest',
    'sphinx.ext.autodoc',
    'sphinx.ext.autosummary',
+   'sphinxcontrib.napoleon',
 ]
 
 # Add any paths that contain templates here, relative to this directory.

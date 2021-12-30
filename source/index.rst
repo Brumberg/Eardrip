@@ -19,7 +19,7 @@ Documentation
 
 |
 
-	This document gives a brief overview of all available modules   
+   This document gives a brief overview of all available modules
 	
 |
 
@@ -47,6 +47,23 @@ The ``HTTPWebServer`` class
 
 |
 
+The ``rema`` module
+*******************
+.. autoclass:: python.rema.remotedatabase
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+|
+
+|
+
+The ``tools`` module
+********************
+.. autofunction:: python.tools.mulo.CreatePlayList
+
+|
+
 The ``main`` module
 *******************
 .. autoclass:: main.MyServer
@@ -61,6 +78,10 @@ The ``main`` module
 The ``main`` module
 *******************
 .. autofunction:: main.StartupServer
+
+|
+
+.. autofunction:: main.StartupRema
 
 |
 
