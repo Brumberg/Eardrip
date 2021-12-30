@@ -20,8 +20,12 @@
     <body>
 		<script>
 		function validateForm() {
-			validateUser()
-			validatePassword()
+			let retVal = validateUser();
+			if (retVal!=0)
+			{
+				retVal = validatePassword();
+			}
+			return retVal;
 		}
 		
 		function validateUser() {
