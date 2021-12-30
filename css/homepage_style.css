@@ -1,11 +1,20 @@
 /* #CD5C5C - Light red */
 /* #181818 - Lighter Black */
+/* #707070 - Grey for head splitter */
 
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
     font-family: 'Hind Siliguri', sans-serif;
+}
+
+.navigation {
+    position: fixed;
+
+    /* head splitter line*/
+    border-bottom: 1px solid #707070;
+    width: 100%;
 }
 /* navigation bar */
 nav {
@@ -29,6 +38,11 @@ nav a {
     color: #000;
     padding: 0.2rem;
 }
+
+.fliters button {
+
+}
+
 /* navigation bar buttons */
 button {
     padding: 0.4rem 0.7rem;
@@ -44,6 +58,11 @@ body {
     background: #181818;
 }
 
+.searchbar_container {
+    padding: 2rem;
+
+}
+
 /* searchbar asthetics*/
 .searchbar {
     display: flex;
@@ -52,6 +71,7 @@ body {
     border-radius: 1rem;
     color: white;
     width: 35rem;
+    margin-top: 5rem;
 }
 
 input {

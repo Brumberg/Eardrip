@@ -6,47 +6,53 @@
 
 
         <!-- search bar icon import from fontawsome -->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" />
+        <link rel = "stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" />
 
         <!-- font imports -->
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300&family=Overpass:wght@200&family=Shizuru&display=swap" rel="stylesheet">
+        <link rel = "preconnect" href="https://fonts.googleapis.com">
+        <link rel = "preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href = "https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300&family=Overpass:wght@200&family=Shizuru&display=swap" rel = "stylesheet">
 
         <!-- imports css-->
-        <link rel="stylesheet" href="../css/homepage_style.css">
+        <link rel = "stylesheet" href="../css/homepage_style.css">
     </head>
 
     <body>
-        <h1>
-            <nav>
-                <!--logo,login/sign up and profile navigation-->
-                <div class="logo">EARDRIP</div>
-                <div class = "menu">
-                    <a href="homepage.html"><button>Homepage</button></a>
-                    <a href="login_signup.html"><button>Login/Sign up</button></a>
-                    <a href="profile.html"><button>Profile</button></a>
-                </div>
-            </nav>
+        <header>
+            <div class = "navigation">
+                <nav>
+                    <!--logo,login/sign up and profile navigation-->
+                    <div class = "logo">EARDRIP</div>
+                    <div class = "menu">
+                        <a href = "homepage.html"><button>Homepage</button></a>
+                        <a href = "login_signup.html"><button>Login/Sign up</button></a>
+                        <a href = "profile.html"><button>Profile</button></a>
+                    </div>
+                </nav>
+            </div>
+        </header>
+
+
 
             <!--search bar and search icon-->
-			<form action="" method="POST">
-            <div class="searchbar">
-                <input type="text" name="songname" value="placeholder" placeholder="Search by song name . . ." />
-				<input type="text" name="artist" value="placeholder" placeholder="Search by artist . . ." />
-                <a href="results.html"><button><div class="fa fa-search"></button></a></div>
-			</div>
-			</form>
-        </h1>
+        <div class = "searchbar_container">
+            <div class = "searchbar">
+                <input type = "search_input" placeholder = "Search by song name . . ." />
+                <a href = "results.html"><button><div class = "fa fa-search"></button></a></div>
+            </div>
+        </div>
 
-        <h2>
+
             <!--filters-->
+        <div class = "filters_container">
             <div class = "filters">
                 <button>by year</button>
                 <button>by artist name</button>
                 <button>by genre</button>
+
+                <div class = "invisible">abcdce</div>
             </div>
-        </h2>
+        </div>
 
     </body>
 
