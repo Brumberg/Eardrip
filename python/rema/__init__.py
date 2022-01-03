@@ -1,6 +1,7 @@
 
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
+import logging
 
 class remotedatabase():
     """Remote access handler for spotify queries"""
@@ -26,9 +27,9 @@ class remotedatabase():
         """destructuor - release resources
 
         """
-        print("Terminate ppotify connection")
+        logging.info("Terminate spotify connection")
 
-    def GetAttributes(self):
+    def GetAttributes(self, track):
         """GetAttributes return a list of attributes from the spotify playlist. They are finally being used to optimize the recommendation algorithm.
 
         :param self: list of attributes TBD
@@ -42,8 +43,9 @@ class remotedatabase():
         popularity = []
         track_id = []
         sp = self.sp
-        for i in range(0, 1000, 50):
-            track_results = sp.search(q='year:2018', type='track', limit=50, offset=i)
+        searchfilter = 'track:{track}'.format(track=track)
+        for i in range(0, 25, 5):
+            track_results = sp.search(q=searchfilter, type='track', limit=50, offset=i)
             for i, t in enumerate(track_results['tracks']['items']):
                 artist_name.append(t['artists'][0]['name'])
                 track_name.append(t['name'])

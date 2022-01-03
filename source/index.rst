@@ -47,6 +47,50 @@ The ``HTTPWebServer`` class
 
 |
 
+The ``GenericFormHandler`` class
+********************************
+.. autoclass:: python.webserver.formhandler.GenericFormHandler
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+|
+
+|
+
+The ``HomepageHandler`` class
+********************************
+.. autoclass:: python.webserver.formhandler.HomepageHandler
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+|
+
+|
+
+The ``LoginHandler`` class
+**************************
+.. autoclass:: python.webserver.formhandler.LoginHandler
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+|
+
+|
+
+The ``ProfileHandler`` class
+********************************
+.. autoclass:: python.webserver.formhandler.ProfileHandler
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+|
+
+|
+
 The ``rema`` module
 *******************
 .. autoclass:: python.rema.remotedatabase
