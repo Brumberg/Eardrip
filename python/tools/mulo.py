@@ -29,7 +29,8 @@ def CreatePlayList(basefolder, filename, append):
                         i = i+1
 
             json.dump(dict, f)
-            print('Number of songs: {}'.format(i))
+            
+            print('-------------------','Number of songs: {}'.format(i))
 
     except IOError:
         print('Can not create file')

@@ -148,8 +148,8 @@ class HomepageHandler(GenericFormHandler):
 
         if retVal:
             track_name = self.m_ParameterSet[b'homepage_songtitle'].decode("utf-8")
-            [artist_name, track_name, popularity, track_id] = self.m_Spy.GetAttributes(track_name)
-
+            [artist_name, track_name, popularity, track_id, track_uri] = self.m_Spy.GetAttributes(track_name)
+            # self.m_Spy.GetTrackAnalytics(track_uri)
             music_list = str()
             for i in range(0, len(artist_name)):
                 table_row = self.m_HTMLTableRowDescriptor
