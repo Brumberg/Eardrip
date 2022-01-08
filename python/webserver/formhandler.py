@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from typing import Tuple
 import python.rema
 
 class GenericFormHandler:
@@ -61,7 +62,7 @@ class GenericFormHandler:
         self.m_ParameterSet = param_set.copy()
 
     @abstractmethod
-    def CreateResponse(self) -> tuple[bool, str]:
+    def CreateResponse(self) -> Tuple[bool, str]:
         """create html response
 
         :return: status, html content
@@ -129,7 +130,7 @@ class HomepageHandler(GenericFormHandler):
         super().GetParameterSet(param_set)
         print('Homepage handler executed')
 
-    def CreateResponse(self) -> tuple[bool, str]:
+    def CreateResponse(self) -> Tuple[bool, str]:
         """create html response
 
         :return: status, html content
@@ -202,7 +203,7 @@ class LoginHandler(GenericFormHandler):
         for i in param_set:
             print(i)
 
-    def CreateResponse(self) -> tuple[bool, str]:
+    def CreateResponse(self) -> Tuple[bool, str]:
         """create html response
 
         :return: status, html content
@@ -254,7 +255,7 @@ class ProfileHandler(GenericFormHandler):
         for i in param_set:
             print(i)
 
-    def CreateResponse(self) -> tuple[bool, str]:
+    def CreateResponse(self) -> Tuple[bool, str]:
         """create html response
 
         :return: status, html content
