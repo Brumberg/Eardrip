@@ -18,7 +18,7 @@
     </head>
 
     <body>
-		<script>
+		<!-- <script>
 		function validateForm() {
 			let retVal = validateUser();
 			if (retVal != 0)
@@ -57,8 +57,8 @@
 				return true;
 			}
 		} 		
-		</script>
-        <h1>
+		</script> -->
+
             <nav>
                 <!-- logo,login/sign up and profile navigation-->
                 <div class = "logo">EARDRIP</div>
@@ -72,28 +72,30 @@
             <!-- log in and sgin up features -->
             <div class = "login_signup">
 
-                <div class = "login">Log In
-                    <input type = "login_username" placeholder = "username . . ." />
-                    <div class = "login_username_check"><button>Check</button>
+                <form name = "loginform" action = "" onsubmit = "return validateForm()" method = "post">
+                    <div class = "login">Log In
+                        <input type = "text" name = "login_usernameid" id = "login_usernameid" value = "" placeholder = "username . . ." />
+                        <div class = "login_username_check"><button>Check</button></div>
 
-                    <input type = "login_password" placeholder = "password . . ." />
-                    <div class = "login_password_check"><button>Check</button>
-                </div>
-				<form name = "signupform" action = "" onsubmit = "return validateForm()" method = "post">
-					<div class = "signup">Sign Up
-						<input type = "signup_username" name = "signup_userid" id = "signup_userid" value = "" placeholder = "username . . ." />
-						<div class = "signup_username_check"><button>Check</button>
+                        <input type = "text" name = "login_passwordid" id = "login_passwordid" value = "" placeholder = "password . . ." />
+                        <div class = "login_password_check"><button>Check</button></div>
+                    </div>
+                <input type="hidden" id="FormIdentifier" name="FormIdentifier" value="login_form">
+                </form>
+                <form name = "signupform" action = ""  method = "post">
+				    <div class = "signup">Sign Up
+					    <input type = "text" name = "signup_usernameid" id = "signup_usernameid" value = "" placeholder = "username . . ." />
+                        <div class = "signup_username_check"><button>Check</button></div>
 
-						<input type = "signup_password" name = "signup_passwordid" id = "signup_passwordid" value = "" placeholder = "password . . ." />
-                        <div class = "signup_password_check"><button>Check</button>
+                        <input type = "text" name = "signup_passwordid" id = "signup_passwordid" value = "" placeholder = "password . . ." />
+                        <div class = "signup_password_check"><button>Check</button></div>
 
-						<input type = "email" placeholder = "email . . ." />
-					</div>
-                    <input type="hidden" id="FormIdentifier" name="FormIdentifier" value="login_form">
-				</form>
+                        <input type = "email" name = "signup_emailid" id = "signup_emailid" value = "" placeholder = "email . . ." />
+                        <input type="submit" value = "send">
+                    </div>
+                <input type="hidden" id="FormIdentifier" name="FormIdentifier" value="signup_form">
+                </form>
             </div>
-        </h1>
-    <h2> asasdegsfdgsdg</h2>
     </body>
 
 </html>

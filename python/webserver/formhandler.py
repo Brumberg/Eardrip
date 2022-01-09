@@ -1,5 +1,16 @@
 from abc import ABCMeta, abstractmethod
 import python.rema
+import mysql.connector
+from typing import Tuple
+
+# connects python to the database
+db = mysql.connector.connect(
+    host = "localhost" ,
+    user = "root" ,
+    passwd = "Root" ,
+    database = "testdatabase"
+    )
+mycursor = db.cursor()
 
 class GenericFormHandler:
     """This is a conceptual class representation of a generic form interface.
@@ -61,7 +72,7 @@ class GenericFormHandler:
         self.m_ParameterSet = param_set.copy()
 
     @abstractmethod
-    def CreateResponse(self) -> tuple[bool, str]:
+    def CreateResponse(self) -> Tuple[bool, str]:
         """create html response
 
         :return: status, html content
@@ -129,7 +140,7 @@ class HomepageHandler(GenericFormHandler):
         super().GetParameterSet(param_set)
         print('Homepage handler executed')
 
-    def CreateResponse(self) -> tuple[bool, str]:
+    def CreateResponse(self) -> Tuple[bool, str]:
         """create html response
 
         :return: status, html content
@@ -202,7 +213,7 @@ class LoginHandler(GenericFormHandler):
         for i in param_set:
             print(i)
 
-    def CreateResponse(self) -> tuple[bool, str]:
+    def CreateResponse(self) -> Tuple[bool, str]:
         """create html response
 
         :return: status, html content
@@ -213,11 +224,97 @@ class LoginHandler(GenericFormHandler):
         file_content = []
         retVal = False
         try:
+            login_username = self.m_ParameterSet[b'login_usernameid'].decode('utf-8')
+            login_password = self.m_ParameterSet[b'login_passwordid'].decode('utf-8')
+
+            # searches database for the username
+            mycursor.execute("SELECT * FROM user WHERE username = '%s'" % login_username)
+            real_login_username = mycursor.fetchone()
+
+            if real_login_username == None:
+                print("INVALID USERNAME")
+
+            elif real_login_username[1] == login_password:
+                print("SUCCESSFUL")
+
+            else:
+                print("INVALID PASSWORD")
+
+            mycursor.reset()
+            
             file_content = open('./html/profile.html').read()
             retVal = True
         except OSError:
             print("Unable to open file")
         return retVal, file_content
+
+class SignupHandler(GenericFormHandler):
+    def __init__(self):
+        """Constructor, resets the formular handler dictionary
+
+        :return: -
+        :rtype: -
+
+        """
+        # print('Constructor of signup handler called')
+        super().__init__()
+
+    def __del__(self):
+        """Destructor, resets the formular handler dictionary
+
+        :return: -
+        :rtype: -
+
+        """
+        # print('Destructor of signup handler called')
+        super().__del__()
+
+    def GetParameterSet(self, param_set: dict):
+        """extract parameter set and store it
+
+        :param paramset: dictionarycontaining all parameters
+        :type: dict
+        :return: -
+        :rtype: -
+
+        """
+        super().GetParameterSet(param_set)
+        print('GetParameterSet of signup handler called')
+        for i in param_set:
+            print(i)
+
+    def CreateResponse(self) -> Tuple[bool, str]:
+        """create html response
+
+        :return: status, html content
+        :rtype: boolean, string
+
+        """
+        print('CreateResponse of signup handler called')
+        file_content = []
+        retVal = False
+        try:
+            signup_username = self.m_ParameterSet[b'signup_usernameid'].decode('utf-8')
+            signup_password = self.m_ParameterSet[b'signup_passwordid'].decode('utf-8')
+            signup_email = self.m_ParameterSet[b'signup_emailid'].decode('utf-8')
+
+            print(signup_username)
+            print(signup_password)
+            print(signup_email)
+
+
+            # adds the variables to the user table in the database
+            mycursor.execute("INSERT INTO user (username, password, email) VALUES (%s, %s, %s)", (signup_username, signup_password, signup_email))
+            db.commit()
+
+
+            file_content = open('./html/profile.html').read()
+            retVal = True
+        except OSError:
+            print("Unable to open file")
+            self.send_response(404)
+        return retVal, file_content
+
 
 class ProfileHandler(GenericFormHandler):
     def __init__(self):
@@ -254,7 +351,7 @@ class ProfileHandler(GenericFormHandler):
         for i in param_set:
             print(i)
 
-    def CreateResponse(self) -> tuple[bool, str]:
+    def CreateResponse(self) -> Tuple[bool, str]:
         """create html response
 
         :return: status, html content

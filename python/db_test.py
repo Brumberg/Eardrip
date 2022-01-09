@@ -56,4 +56,4 @@ def generalsearch():
         realusername = ''.join(realusername)
         print("WELCOME, " + usernameinput)
 
-generalsearch()
+displaycontent()

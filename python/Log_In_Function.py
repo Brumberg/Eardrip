@@ -8,53 +8,24 @@ db = mysql.connector.connect(
     database = "testdatabase"
     )
 mycursor = db.cursor()
-LoggedIn = False
 
 def login():
-    validusername = False
-    validpassword = False
-    attempts = int(3)
-    print("Welcome to the login page")
 
-    # checks validity of username
-    while validusername == False:
-        usernameinput = input ("please enter your username: ")
+    login_username = ()
+    login_password = ()
 
-        # searches database for the username
-        mycursor.execute("SELECT username FROM user WHERE username = '%s'" % usernameinput)
-        realusername = mycursor.fetchone()
+    # searches database for the username
+    mycursor.execute("SELECT * FROM user WHERE username = '%s'" % login_username)
+    real_login_username = mycursor.fetchone()
 
-        if realusername == (None):
-            print("Invalid username, please try again")
-            validusername = False
+    if real_login_username == None:
+        print("INVALID USERNAME")
 
-        else:
-            realusername = ''.join(realusername)
-            username = usernameinput
-            validusername = True
+    elif real_login_username[1] == login_password:
+        print("SUCCESSFUL")
 
-    # checks validity of password + gives the user 3 attempts to get the password correct
-    while validpassword == False:
-        passwordinput = input ("please enter your password: ")
+    else:
+        print("INVALID PASSWORD")
 
-        # searches the for the username in the database and finds the corresponding password
-        mycursor.execute("SELECT password FROM user WHERE username = '%s'" % username)
-        realpassword = mycursor.fetchone()
-
-        # converts the value from tuple form to string form
-        realpassword = ''.join(realpassword)
-
-        if passwordinput == (realpassword):
-            validpassword = True
-            print("welcome, "+username)
-            LoggedIn = True
-
-        else:
-            print("Invalid password")
-            attempts = (attempts - 1)
-            if attempts == (0):
-                print("you have 0 attempts left")
-                quit()
-            else:
-                print("you have",attempts,"attempts left, please try again")
-            validpassword = False
+    mycursor.reset()
+login()
