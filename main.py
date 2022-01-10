@@ -10,7 +10,7 @@ import python.tools.mulo as mulo
 class MyServer(BaseHTTPRequestHandler):
     m_FormHandler = {}
     m_CallbackHandler = {}
-    def __init__(self, *args):
+    def __init__(self, *arguments):
         """Constructor, resets the formular handler dictionary
 
         :return: -
@@ -21,7 +21,7 @@ class MyServer(BaseHTTPRequestHandler):
         self.m_CallbackHandler = MyServer.m_FormHandler.copy()
         for i in self.m_CallbackHandler:
             self.m_CallbackHandler[i].RegisterSpy(spy)
-        BaseHTTPRequestHandler.__init__(self, *args)
+        BaseHTTPRequestHandler.__init__(self, *arguments)
 
     def __del__(self):
         """Destructor

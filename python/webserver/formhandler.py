@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from typing import Tuple
 import python.rema
 import mysql.connector
 from typing import Tuple
@@ -158,16 +159,27 @@ class HomepageHandler(GenericFormHandler):
 
         if retVal:
             track_name = self.m_ParameterSet[b'homepage_songtitle'].decode("utf-8")
-            [artist_name, track_name, popularity, track_id] = self.m_Spy.GetAttributes(track_name)
+            track_data = self.m_Spy.GetAttributes(track_name)
+            track_uri = []
+            artist_info = []
+            artist_uri = []
+
+            for i in range(0, len(track_data)):
+                track_uri.append(track_data[i]['uri'])
+                artist_uri.append(track_data[i]['artist_uri'])
+
+            artist_info = self.m_Spy.GetArtistInfo(artist_uri)
+            track_analysis = self.m_Spy.GetTrackAnalytics(track_uri[0])
 
             music_list = str()
-            for i in range(0, len(artist_name)):
+            for i in range(0, len(track_data)):
                 table_row = self.m_HTMLTableRowDescriptor
-                table_row = table_row.replace('ARTIST_ID', artist_name[i])
-                table_row = table_row.replace('TITLE_ID', track_name[i])
-                table_row = table_row.replace('TRACK_ID', track_id[i])
-                table_row = table_row.replace('GENRE_ID', 'pop')
-                table_row = table_row.replace('POPULARITY', str(popularity[i]))
+                table_row = table_row.replace('ARTIST_ID', track_data[i]['artist'])
+                table_row = table_row.replace('TITLE_ID', track_data[i]['track'])
+                table_row = table_row.replace('TRACK_ID', track_data[i]['track_id'])
+                table_row = table_row.replace('GENRE_ID', ','.join(artist_info[i]['genres']))
+                table_row = table_row.replace('POPULARITY', str(track_data[i]['popularity']))
+                #table_row = table_row.replace('URI', track_data[i]['uri'])
                 music_list = music_list+table_row
 
             table_header = self.m_HTMLHeaderLine
