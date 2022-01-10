@@ -35,16 +35,12 @@ class remotedatabase():
 
         :param self: list of attributes TBD
         :type name: list or tuple
-        :return value: collection of lists of matches
+        :return value: collection of lists dictonaries of matches
 
         """
 
-        artist_name = []
-        track_name = []
-        popularity = []
-        track_id = []
-        track_uri = []
         sp = self.sp
+        attributes_list = list()
 
         #searchfilter = 'track:{track}, artist:{artist}, genre:={genre}'.format(track=track, artist=artist, genre=genre)
         search_filter = ''
@@ -65,16 +61,17 @@ class remotedatabase():
             else:
                 search_filter = add_filter
 
-        for i in range(0, 25, 5):
-            track_results = sp.search(q=search_filter, limit=50, offset=i)
+        max_num_titles = 25
+        package_size = 5
+        for i in range(0, max_num_titles, package_size):
+            track_results = sp.search(q=search_filter, limit=package_size, offset=i)
+            if track_results == None:
+                break
+                
             for i, t in enumerate(track_results['tracks']['items']):
-                artist_name.append(t['artists'][0]['name'])
-                track_name.append(t['name'])
-                track_id.append(t['id'])
-                popularity.append(t['popularity'])
-                track_uri.append(t['uri'])
+                attributes_list.append(t)
 
-        return artist_name, track_name, popularity, track_id, track_uri
+        return attributes_list
 
     def GetTrackAnalytics(self, track_uri=None):
         """GetTrackAnalytics returns a list of attributes associated with the track_uri

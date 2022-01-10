@@ -15,7 +15,7 @@ def CreatePlayList(basefolder, filename, append):
     """
     i = 0
     ending = '.mp3'
-    writeaccess = 'a' if append else 'w'
+    writeaccess = 'w' # if append else 'w'
     try:
         with open(filename, writeaccess) as f:
             len_ending = len(ending)
@@ -29,8 +29,8 @@ def CreatePlayList(basefolder, filename, append):
                         i = i+1
 
             json.dump(dict, f)
-            
-            print('-------------------','Number of songs: {}'.format(i))
+            f.truncate()
+            print('----------------------------------------------------\n','Number of songs: {}'.format(i),'\n----------------------------------------------------\n')
 
     except IOError:
         print('Can not create file')

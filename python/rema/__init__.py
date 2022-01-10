@@ -29,7 +29,20 @@ class remotedatabase():
         """
         logging.info("Terminate spotify connection")
 
-    def GetAttributes(self, track=None, artist=None, genre=None):
+    def GetArtistInfo(self, artist_uri):
+        """GetArtistInfo returns additional information like the genre
+
+        :param self: list of attributes TBD
+        :type name: list or tuple
+        :return value: collection of lists of matches
+
+        """
+        artist_info_list = []
+        for i in artist_uri:
+            artist_info_list.append(self.sp.artist(i))
+        return artist_info_list
+
+    def GetAttributes(self, track=None, artist=None, genre=None, max_no_tracks=10, packet_size=5):
         """GetAttributes return a list of attributes from the spotify playlist. They are finally being used to optimize
         the recommendation algorithm.
 
@@ -39,11 +52,7 @@ class remotedatabase():
 
         """
 
-        artist_name = []
-        track_name = []
-        popularity = []
-        track_id = []
-        track_uri = []
+        track_properties = list()
         sp = self.sp
 
         #searchfilter = 'track:{track}, artist:{artist}, genre:={genre}'.format(track=track, artist=artist, genre=genre)
@@ -65,16 +74,22 @@ class remotedatabase():
             else:
                 search_filter = add_filter
 
-        for i in range(0, 25, 5):
-            track_results = sp.search(q=search_filter, limit=50, offset=i)
-            for i, t in enumerate(track_results['tracks']['items']):
-                artist_name.append(t['artists'][0]['name'])
-                track_name.append(t['name'])
-                track_id.append(t['id'])
-                popularity.append(t['popularity'])
-                track_uri.append(t['uri'])
+        for i in range(0, max_no_tracks, packet_size):
+            track_results = sp.search(q=search_filter, limit=packet_size, offset=i)
+            if track_results == None:
+                break
 
-        return artist_name, track_name, popularity, track_id, track_uri
+            for i, t in enumerate(track_results['tracks']['items']):
+                property_concatenation = dict()
+                property_concatenation['artist'] = t['artists'][0]['name']
+                property_concatenation['artist_uri'] = t['artists'][0]['external_urls']['spotify']
+                property_concatenation['track'] = t['name']
+                property_concatenation['track_id'] = t['id']
+                property_concatenation['popularity'] = t['popularity']
+                property_concatenation['uri'] = t['uri']
+                track_properties.append(property_concatenation)
+
+        return track_properties
 
     def GetTrackAnalytics(self, track_uri=None):
         """GetTrackAnalytics returns a list of attributes associated with the track_uri
