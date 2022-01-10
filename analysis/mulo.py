@@ -24,7 +24,7 @@ def CreatePlayList(basefolder, filename, append):
                 for name in files:
                     if name.endswith('.mp3'):
                         n = name[0:-len_ending]
-                        print('Songindex= {ix}, title= {title}'.format(ix=i, title=n))
+                        print('Songindex={ix}, artist/title= {title}'.format(ix=i, title=n))
                         dict[i] = n
                         i = i+1
 
