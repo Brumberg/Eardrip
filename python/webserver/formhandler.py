@@ -13,6 +13,7 @@ class GenericFormHandler:
 
     """
     m_ParameterSet = dict()
+    m_ProfileInfo = dict()
 
     """spotify handler
 
@@ -36,6 +37,18 @@ class GenericFormHandler:
 
         """
         self.m_ParameterSet = {}
+
+    def RegisterProfile(self, profileinfo):
+        """Register spy (spotify) object
+
+        :param spy: object handles requests/inqueries to/from spotify
+        :type: spy object
+        :return: -
+        :rtype: -
+
+        """
+        self.m_ProfileInfo = profileinfo
+
 
     def RegisterSpy(self, spy):
         """Register spy (spotify) object
@@ -274,11 +287,21 @@ class ProfileHandler(GenericFormHandler):
 
         """
         print('CreateResponse of profile handler called')
-        file_content = []
-        retVal = False
-        try:
+        if self.m_ProfileInfo['Validated'] == True:
+            file_content = []
+            retVal = False
+            try:
+                file_content = open('./html/profile.html').read()
+                retVal = True
+            except OSError:
+                print("Unable to open file")
+            return retVal, file_content
+        else:
+            print('Error: Profile non existing')
             file_content = open('./html/profile.html').read()
+            self.m_ProfileInfo['username'] = 'unknown'
+            self.m_ProfileInfo['email'] = 'unknown'
+            self.m_ProfileInfo['role'] = '-'
+            self.m_ProfileInfo['Validated'] = False
             retVal = True
-        except OSError:
-            print("Unable to open file")
-        return retVal, file_content
+
