@@ -32,6 +32,15 @@ def displaycontent():
         print (x)
 
 
+# deletes database content
+def delete():
+    mycursor.execute("DELETE FROM user WHERE username='sam cliffe';")
+    db.commit()
+
+def deleteall():
+    mycursor.execute("DELETE FROM user")
+    db.commit()
+
 # searches the password that corresponds with the username
 def searchconditionally():
     userinput = ("12345")
@@ -55,5 +64,3 @@ def generalsearch():
     else:
         realusername = ''.join(realusername)
         print("WELCOME, " + usernameinput)
-
-displaycontent()

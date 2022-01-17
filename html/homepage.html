@@ -5,63 +5,57 @@
         <title>EarDrip</title>
 
 
-        <!-- search bar icon import from fontawsome -->
-        <link rel = "stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" />
+        <!-- search bar icons from fontawsome -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" />
 
         <!-- font imports -->
-        <link rel = "preconnect" href="https://fonts.googleapis.com">
-        <link rel = "preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href = "https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300&family=Overpass:wght@200&family=Shizuru&display=swap" rel = "stylesheet">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300&family=Overpass:wght@200&family=Shizuru&display=swap" rel = "stylesheet">
 
         <!-- imports css-->
-        <link rel = "stylesheet" href="../css/homepage_style.css">
+        <link rel="stylesheet" href="../CSS/index_style.css">
     </head>
 
     <body>
-        <header>
-            <div class = "navigation">
-                <nav>
-                    <!--logo,login/sign up and profile navigation-->
-                    <div class = "logo">EARDRIP</div>
-                    <div class = "menu">
-                        <a href = "homepage.html"><button>Homepage</button></a>
-                        <a href = "login_signup.html"><button>Login/Sign up</button></a>
-                        <a href = "profile.html"><button>Profile</button></a>
-                    </div>
-                </nav>
-            </div>
-        </header>
-
-
-
-            <!--search bar and search icon-->
-        <div class = "searchbar_container">
-            <form name = "homepageform" action = "" onsubmit = "return validateForm()" method = "post">
-                <input type="hidden" id="FormIdentifier" name="FormIdentifier" value="homepage_form">
-                <div class = "searchbar">
-                    <input type = "search_input" name="homepage_songtitle" placeholder = "Search by song name . . ." />
-                    <a href = "results.html"><button><div class = "fa fa-search"></button></a></div>
+        <!--logo,login/sign up and profile navigation-->
+        <div class="navigation">
+            <nav>
+                <div class="logo">EARDRIP</div>
+                <div class="menu">
+                    <a href="homepage.html"><button>Homepage</button></a>
+                    <a href="index.html"><button>Login/Sign up</button></a>
+                    <a href="profile.html"><button>Profile</button></a>
                 </div>
-            </form>
+            </nav>
         </div>
 
 
-            <!--filters-->
-        <div class = "filters_container">
-            <div class = "filters">
+        <!--search bar and search icon-->
+        <center><div class="searchbar_container">
+            <form name="homepageform" action="" onsubmit="return validateForm()" method="post">
+                <input type="hidden" id="FormIdentifier" name="FormIdentifier" value="homepage_form">
+                <div class="searchbar">
+                    <input type="search_input" name="homepage_songtitle" placeholder="Search by song name . . ." >
+                    <a href="homepage.html"><button><div class="fa fa-search"></div></button></a>
+                </div>
+            </form>
+        </div></center>
+
+        <!--filters-->
+        <div class="filters_container">
+            <div class="filters">
                 <button>by year</button>
                 <button>by artist name</button>
                 <button>by genre</button>
 
-                <!-- div class = "invisible">abcdce</div> -->
             </div>
         </div>
 
         <!--filters-->
-        <div class = "navigation">
+        <div class="searchresults">
             <!-- homepage_result_table -->
         </div>
     </body>
-
 
 </html>
