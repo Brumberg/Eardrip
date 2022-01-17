@@ -171,7 +171,7 @@ class HomepageHandler(GenericFormHandler):
                 artist_uri.append(track_data[i]['artist_uri'])
 
             artist_info = self.m_Spy.GetArtistInfo(artist_uri)
-            track_analysis = self.m_Spy.GetTrackAnalytics(track_uri[0])
+            track_analysis = self.m_Spy.GetTrackAnalytics(track_uri)
 
             music_list = str()
             for i in range(0, len(track_data)):
