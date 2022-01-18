@@ -85,7 +85,7 @@ class remotedatabase():
                 property_concatenation['artist_uri'] = t['artists'][0]['external_urls']['spotify']
                 property_concatenation['track'] = t['name']
                 property_concatenation['track_id'] = t['id']
-                property_concatenation['popularity'] = t['popularity']
+                property_concatenation['popularity'] = float(t['popularity'])
                 property_concatenation['uri'] = t['uri']
                 track_properties.append(property_concatenation)
 
