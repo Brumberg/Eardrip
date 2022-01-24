@@ -2,7 +2,6 @@
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 import logging
-
 class remotedatabase():
     """Remote access handler for spotify queries"""
 
@@ -37,7 +36,6 @@ class remotedatabase():
         :return value: collection of lists of matches
 
         """
-
         artist_name = []
         track_name = []
         popularity = []

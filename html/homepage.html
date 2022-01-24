@@ -24,7 +24,12 @@
                 <div class="logo">EARDRIP</div>
                 <div class="menu">
                     <a href="homepage.html"><button>Homepage</button></a>
-                    <a href="index.html"><button>Login/Sign up</button></a>
+
+                    <form name="logoutform" action="" onsubmit="return validateForm()" method="post">
+                        <a href="index.html"><button>Log Out</button></a>
+                        <input type="hidden" id="FormIdentifier" name="FormIdentifier" value="logout_form">
+                    </form>
+
                     <a href="profile.html"><button>Profile</button></a>
                 </div>
             </nav>
@@ -54,7 +59,7 @@
 
         <!--filters-->
         <div class="searchresults">
-            <!-- homepage_result_table -->
+                <!-- homepage_result_table -->
         </div>
     </body>
 

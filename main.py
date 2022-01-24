@@ -152,6 +152,8 @@ def StartupServer():
     MyServer.RegisterForm(b'login_form', python.webserver.formhandler.LoginHandler())
     MyServer.RegisterForm(b'signup_form', python.webserver.formhandler.SignupHandler())
     MyServer.RegisterForm(b'profile_form', python.webserver.formhandler.ProfileHandler())
+    MyServer.RegisterForm(b'song_form', python.webserver.formhandler.SongHandler())
+
     server.Start(MyServer)
 
 def StartupRema():

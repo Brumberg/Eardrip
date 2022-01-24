@@ -5,22 +5,26 @@ db = mysql.connector.connect(
     host = "localhost" ,
     user = "root" ,
     passwd = "Root" ,
-    database = "testdatabase"
+    database = "eardrip_users"
     )
 mycursor = db.cursor()
 
 # creates a database
 def createdatabase():
-    mycursor.execute("CREATE DATABASE testdatabase")
-
+    mycursor.execute("CREATE DATABASE eardrip_users")
 
 # creates a table
 def createtable():
     mycursor.execute("CREATE TABLE user (username VARCHAR(50), password VARCHAR(50), email VARCHAR(50), userID int PRIMARY KEY AUTO_INCREMENT)")
 
+def deletetable():
+    mycursor.execute("DROP TABLE users")
 
 # adds data to the table
 def commit():
+    username = ("sam cliffe")
+    password = ("12345")
+    useremail = ("sam.j.cliffe@outlook.com")
     mycursor.execute ("INSERT INTO user (username, password, email) VALUES (%s, %s, %s)", (username, password, useremail))
     db.commit()
 
@@ -30,7 +34,6 @@ def displaycontent():
     mycursor.execute ("SELECT * FROM user")
     for x in mycursor:
         print (x)
-
 
 # deletes database content
 def delete():
@@ -64,3 +67,5 @@ def generalsearch():
     else:
         realusername = ''.join(realusername)
         print("WELCOME, " + usernameinput)
+
+displaycontent()
