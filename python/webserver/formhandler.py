@@ -1,8 +1,10 @@
 from abc import ABCMeta, abstractmethod
 from typing import Tuple
-import python.rema
 import mysql.connector
 from typing import Tuple
+
+import python.rema
+
 
 class GenericFormHandler:
     """This is a conceptual class representation of a generic form interface.
@@ -31,7 +33,7 @@ class GenericFormHandler:
         """
         m_ParameterSet = {}
 
-    # connects python to the database
+        # connects python to the database
         self.m_Db = mysql.connector.connect(
             host="localhost",
             user="root",
@@ -115,7 +117,10 @@ class HomepageHandler(GenericFormHandler):
         '<td>TRACK_ID</td>'
         '<td>GENRE_ID</td>'
         '<td>POPULARITY</td>'
-        '<td><form><input type="hidden" value="TRACK_ID" name="field_track_id_NUMBER" id="field_track_id_NUMBER">'
+        '<td><form name="TABLE_FORM_ACTION" action="" method="post">'
+        '<button>Track_ACTION</button>'
+        '<input type="hidden" id="FormIdentifier" name="FormIdentifier" value="trackselection_form">'
+        '<input type="hidden" value="TRACK_ID" name="field_track_id_NUMBER" id="field_track_id_NUMBER">'
         '<input type="hidden" value="ARTIST_ID_NUMBER" name="field_artist_id_NUMBER" id="field_artist_id_NUMBER">'
         '<input type="hidden"value="TITLE_ID" name="field_title_id_NUMBER" id="field_title_id_NUMBER">'
         '<input type="hidden"value="GENRE_ID" name="field_genre_id_NUMBER" id="field_genre_id_NUMBER">'
@@ -213,6 +218,135 @@ class HomepageHandler(GenericFormHandler):
                 # table_row = table_row.replace('URI', track_data[i]['uri'])
                 table_row = table_row.replace('ACTION', str(i))
                 music_list = music_list+table_row
+
+            table_header = self.m_HTMLHeaderLine
+            table_header = table_header.replace('<!-- header_attachment_anchor -->', music_list)
+
+            table = self.m_HTMLTableResponse
+            table = table.replace('<!-- table_content_anchor -->', table_header)
+            file_content = file_content.replace('<!-- homepage_result_table -->', table)
+        return retVal, file_content
+
+class TrackSelectionHandler(GenericFormHandler):
+    m_HTMLHeaderLine = (
+        '<tr>'
+        '<td>artist</td>'
+        '<td>title</td>'
+        '<td>track id</td>'
+        '<td>genre</td>'
+        '<td>popularity</td>'
+        '<td>action</td>'
+        '</tr>'
+        '<!-- header_attachment_anchor -->'
+    )
+    m_HTMLTableRowDescriptor = (
+        '<tr>'
+        '<td>ARTIST_ID</td>'
+        '<td>TITLE_ID</td>'
+        '<td>TRACK_ID</td>'
+        '<td>GENRE_ID</td>'
+        '<td>POPULARITY</td>'
+        '<td><form name="TABLE_FORM_ACTION" action="" method="post">'
+        '<button>Track_ACTION</button>'
+        '<input type="hidden" id="FormIdentifier" name="FormIdentifier" value="trackselection_form">'
+        '<input type="hidden" value="TRACK_ID" name="field_track_id_NUMBER" id="field_track_id_NUMBER">'
+        '<input type="hidden" value="ARTIST_ID_NUMBER" name="field_artist_id_NUMBER" id="field_artist_id_NUMBER">'
+        '<input type="hidden"value="TITLE_ID" name="field_title_id_NUMBER" id="field_title_id_NUMBER">'
+        '<input type="hidden"value="GENRE_ID" name="field_genre_id_NUMBER" id="field_genre_id_NUMBER">'
+        '<input type="hidden"value="POPULARITY" name="field_popularity_NUMBER" id="field_popularity_NUMBER">'
+        '<input type="hidden"value="DANCEABILITY" name="field_danceability_NUMBER" id="field_danceability_NUMBER">'
+        '<input type="hidden"value="ENERGY" name="field_energy_NUMBER" id="field_energy_NUMBER">'
+        '<input type="hidden"value="LIVENESS" name="field_liveness_NUMBER" id="field_liveness_NUMBER">'
+        '<input type="hidden"value="MODE" name="field_mode_NUMBER" id="field_mode_NUMBER">'
+        '<input type="hidden"value="TIME_SIGNATURE" name="field_time_signature_NUMBER" id="field_time_signature_NUMBER">'
+        '<input type="hidden"value="TEMPO" name="field_tempo_NUMBER" id="field_tempo_NUMBER">'
+        '<input type="hidden"value="VALENCE" name="field_valence_NUMBER" id="field_valence_NUMBER">'
+        'ACTION</form></td>'
+        '</tr>'
+    )
+    m_HTMLTableResponse = (
+        '<table style="width:100%">'
+        '<!-- table_content_anchor -->'
+        '</table>'
+    )
+
+    def __init__(self):
+        """Constructor, resets the form handler dictionary
+
+        :return: -
+        :rtype: -
+
+        """
+        # print('Constructor of homepage handler called')
+        super().__init__()
+
+    def __del__(self):
+        """Destructor, resets the form handler dictionary
+
+        :return: -
+        :rtype: -
+
+        """
+        # print('Destructor of homepage handler called')
+        super().__del__()
+
+    def GetParameterSet(self, param_set: dict):
+        """extract parameter set and store it
+
+        :param paramset: dictionary containing all parameters
+        :type: dict
+        :return: -
+        :rtype: -
+
+        """
+        super().GetParameterSet(param_set)
+        print('Homepage handler executed')
+
+    def CreateResponse(self) -> Tuple[bool, str]:
+        """create html response
+
+        :return: status, html content
+        :rtype: boolean, string
+
+        """
+        print('CreateResponse of homepage handler called')
+        file_content = []
+        retVal = False
+        try:
+            file_content = open('./html/homepage.html').read()
+            retVal = True
+        except OSError:
+            print("Unable to open file")
+
+        if retVal:
+            logged_in = True
+            # mycursor = self.m_Mycursor
+            # db = self.m_Db
+            track_name = self.m_ParameterSet[b'homepage_songtitle'].decode("utf-8")
+            track_data = self.m_Spy.GetAttributes(track_name)
+            track_uri = []
+            artist_info = []
+            artist_uri = []
+
+            for i in range(0, len(track_data)):
+                track_uri.append(track_data[i]['uri'])
+                artist_uri.append(track_data[i]['artist_uri'])
+
+            artist_info = self.m_Spy.GetArtistInfo(artist_uri)
+            track_analysis = self.m_Spy.GetTrackAnalytics(track_uri[0])
+
+            music_list = str()
+            for i in range(0, len(track_data)):
+                table_row = self.m_HTMLTableRowDescriptor
+                table_row = table_row.replace('ARTIST_ID', track_data[i]['artist'])
+                table_row = table_row.replace('TITLE_ID', track_data[i]['track'])
+                table_row = table_row.replace('TRACK_ID', track_data[i]['track_id'])
+                table_row = table_row.replace('GENRE_ID', ','.join(artist_info[i]['genres']))
+                table_row = table_row.replace('POPULARITY', str(track_data[i]['popularity']))
+                table_row = table_row.replace('NUMBER', str(i))
+                # table_row = table_row.replace('URI', track_data[i]['uri'])
+                table_row = table_row.replace('ACTION', str(i))
+                music_list = music_list + table_row
 
             table_header = self.m_HTMLHeaderLine
             table_header = table_header.replace('<!-- header_attachment_anchor -->', music_list)

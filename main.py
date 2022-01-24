@@ -152,6 +152,7 @@ def StartupServer():
     server = python.webserver.HTTPWebServer()
     server.Initialize("localhost", 8080)
     MyServer.RegisterForm(b'homepage_form', python.webserver.formhandler.HomepageHandler())
+    MyServer.RegisterForm(b'trackselection_form', python.webserver.formhandler.TrackSelectionHandler())
     MyServer.RegisterForm(b'login_form', python.webserver.formhandler.LoginHandler())
     MyServer.RegisterForm(b'signup_form', python.webserver.formhandler.SignupHandler())
     MyServer.RegisterForm(b'profile_form', python.webserver.formhandler.ProfileHandler())
