@@ -9,14 +9,15 @@
     font-family: 'Hind Siliguri', sans-serif;
 }
 
+/* navigation bar */
 .navigation {
     position: fixed;
-
+    background-color: #181818;
     /* head splitter line*/
     border-bottom: 1px solid #707070;
     width: 100%;
 }
-/* navigation bar */
+
 nav {
     height: 80px;
     display: flex;
@@ -24,6 +25,7 @@ nav {
     margin: 0 1rem 0 1rem;
     color: white;
 }
+
 /* navigation bar buttons */
 .menu {
     display: flex;
@@ -39,10 +41,6 @@ nav a {
     padding: 0.2rem;
 }
 
-.fliters button {
-
-}
-
 /* navigation bar buttons */
 button {
     padding: 0.4rem 0.7rem;
@@ -54,24 +52,45 @@ button {
     border-radius: 1rem;
 }
 
+/* menu */
+.menu {
+    position: absolute;
+    right: 0;
+}
+
+.menu a{
+    margin-left: 0.5rem;
+}
+
 body {
     background: #181818;
 }
 
+/* search bar */
 .searchbar_container {
     padding: 2rem;
 
 }
 
-/* searchbar asthetics*/
+/* homepage search bar asthetics*/
 .searchbar {
     display: flex;
+    align: center;
     background: #CD5C5C;
     padding: 0.5rem;
     border-radius: 1rem;
     color: white;
     width: 35rem;
     margin-top: 5rem;
+}
+
+/* homepage filters */
+.filters {
+    display: flex;
+    align: center;
+}
+
+.filters button {
 }
 
 input {
@@ -84,9 +103,43 @@ input {
     background: #CD5C5C;
     color: white;
 }
-/* text inside search bar*/
+/* text inside homepage search bar*/
 ::placeholder {
     color: white;
     display: flex;
     text-align: center;
+}
+
+/* homepage search bar results */
+.searchresults td {
+    color: white;
+}
+
+/* profile page */
+.profile.td {
+    color: white;
+}
+
+.login {
+    width: 100%;
+    display: flex;
+    align: center;
+    background: #CD5C5C;
+    padding: 0.5rem;
+    border-radius: 1rem;
+    color: white;
+    width: 35rem;
+    margin-top: 5rem;
+}
+
+.signup {
+    width: 100%;
+    display: flex;
+    align: center;
+    background: #CD5C5C;
+    padding: 0.5rem;
+    border-radius: 1rem;
+    color: white;
+    width: 35rem;
+    margin-top: 5rem;
 }

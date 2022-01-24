@@ -19,9 +19,15 @@ class MyServer(BaseHTTPRequestHandler):
         """
         spy = StartupRema()
         self.m_CallbackHandler = MyServer.m_FormHandler.copy()
+        profileinfo = {'username': 'empty', 'password': 'empty', 'email': 'empty'}
         for i in self.m_CallbackHandler:
             self.m_CallbackHandler[i].RegisterSpy(spy)
+
+		self.m_CallbackHandler[i].RegisterProfile(profileinfo)
         BaseHTTPRequestHandler.__init__(self, *arguments)
+
+            
+
 
     def __del__(self):
         """Destructor
@@ -149,6 +155,7 @@ def StartupServer():
     MyServer.RegisterForm(b'login_form', python.webserver.formhandler.LoginHandler())
     MyServer.RegisterForm(b'signup_form', python.webserver.formhandler.SignupHandler())
     MyServer.RegisterForm(b'profile_form', python.webserver.formhandler.ProfileHandler())
+
     server.Start(MyServer)
 
 def StartupRema():

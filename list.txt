@@ -1,0 +1,24 @@
+* acousticness
+        * danceability
+        * energy
+        * instrumentalness
+        * liveness
+        * loudness
+        * mode (modality)
+        * speechiness
+        * tempo
+        * time_signature
+        * valence
+
+track_name = self.m_ParameterSet[b'homepage_songtitle'].decode("utf-8")
+            track_data = self.m_Spy.GetAttributes(track_name)
+            track_uri = []
+            artist_info = []
+            artist_uri = []
+
+            for i in range(0, len(track_data)):
+                track_uri.append(track_data[i]['uri'])
+                artist_uri.append(track_data[i]['artist_uri'])
+
+            artist_info = self.m_Spy.GetArtistInfo(artist_uri)
+            track_analysis = self.m_Spy.GetTrackAnalytics(track_uri)
