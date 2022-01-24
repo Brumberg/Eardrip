@@ -23,7 +23,7 @@ class MyServer(BaseHTTPRequestHandler):
         for i in self.m_CallbackHandler:
             self.m_CallbackHandler[i].RegisterSpy(spy)
 
-		self.m_CallbackHandler[i].RegisterProfile(profileinfo)
+		#self.m_CallbackHandler[i].RegisterProfile(profileinfo)
         BaseHTTPRequestHandler.__init__(self, *arguments)
 
             

@@ -116,7 +116,7 @@ class HomepageHandler(GenericFormHandler):
         '<td>GENRE_ID</td>'
         '<td>POPULARITY</td>'
         '<td><form><input type="hidden" value="TRACK_ID" name="field_track_id_NUMBER" id="field_track_id_NUMBER">'
-        '<input type="hidden" value="ARTIST_ID" name="field_artist_id" id="field_artist_id_NUMBER">'
+        '<input type="hidden" value="ARTIST_ID_NUMBER" name="field_artist_id_NUMBER" id="field_artist_id_NUMBER">'
         '<input type="hidden"value="TITLE_ID" name="field_title_id_NUMBER" id="field_title_id_NUMBER">'
         '<input type="hidden"value="GENRE_ID" name="field_genre_id_NUMBER" id="field_genre_id_NUMBER">'
         '<input type="hidden"value="POPULARITY" name="field_popularity_NUMBER" id="field_popularity_NUMBER">'
@@ -204,21 +204,14 @@ class HomepageHandler(GenericFormHandler):
             music_list = str()
             for i in range(0, len(track_data)):
                 table_row = self.m_HTMLTableRowDescriptor
-<<<<<<< HEAD
                 table_row = table_row.replace('ARTIST_ID', track_data[i]['artist'])
                 table_row = table_row.replace('TITLE_ID', track_data[i]['track'])
                 table_row = table_row.replace('TRACK_ID', track_data[i]['track_id'])
                 table_row = table_row.replace('GENRE_ID', ','.join(artist_info[i]['genres']))
                 table_row = table_row.replace('POPULARITY', str(track_data[i]['popularity']))
-                #table_row = table_row.replace('URI', track_data[i]['uri'])
-=======
-                table_row = table_row.replace('ARTIST_ID', artist_name[i])
-                table_row = table_row.replace('TITLE_ID', track_name[i])
-                table_row = table_row.replace('TRACK_ID', track_id[i])
-                table_row = table_row.replace('GENRE_ID', 'pop')
-                table_row = table_row.replace('POPULARITY', str(popularity[i]))
-                table_row = table_row.replace('ACTION', str(popularity[i]))
->>>>>>> 6ea282174d68e6a4e007702b4493f8aa3c1969a9
+                table_row = table_row.replace('NUMBER', str(i))
+                # table_row = table_row.replace('URI', track_data[i]['uri'])
+                table_row = table_row.replace('ACTION', str(i))
                 music_list = music_list+table_row
 
             table_header = self.m_HTMLHeaderLine
