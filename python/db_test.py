@@ -15,7 +15,7 @@ def createdatabase():
 
 # creates a table
 def createtable():
-    mycursor.execute("CREATE TABLE user (username VARCHAR(50), password VARCHAR(50), email VARCHAR(50), userID int PRIMARY KEY AUTO_INCREMENT)")
+    mycursor.execute("CREATE TABLE user_ (username VARCHAR(50), password VARCHAR(50), email VARCHAR(50), userID int PRIMARY KEY AUTO_INCREMENT)")
 
 def deletetable():
     mycursor.execute("DROP TABLE users")
@@ -68,4 +68,4 @@ def generalsearch():
         realusername = ''.join(realusername)
         print("WELCOME, " + usernameinput)
 
-displaycontent()
+#mycursor.execute("CREATE TABLE trackdata (artistid VARCHAR(50), (titleid VARCHAR(50), (trackid VARCHAR(50), (genreid VARCHAR(50), (popularity VARCHAR(50) (danceability VARCHAR(50), (energy VARCHAR(50), (liveness VARCHAR(50), (mode VARCHAR(50), (timesignature VARCHAR(50), (tempo VARCHAR(50), (valence VARCHAR(50), trackID int PRIMARY KEY AUTO_INCREMENT)")

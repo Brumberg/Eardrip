@@ -248,7 +248,7 @@ class TrackSelectionHandler(GenericFormHandler):
         '<td>POPULARITY</td>'
         '<td><form name="TABLE_FORM_ACTION" action="" method="post">'
         '<button>Track_ACTION</button>'
-        '<input type="hidden" id="FormIdentifier" name="FormIdentifier" value="trackselection_form">'
+        '<input type="hidden" id="FormIdentifier" name="FormIdentifier" value="homepage_form">'
         '<input type="hidden" value="TRACK_ID" name="field_track_id_NUMBER" id="field_track_id_NUMBER">'
         '<input type="hidden" value="ARTIST_ID_NUMBER" name="field_artist_id_NUMBER" id="field_artist_id_NUMBER">'
         '<input type="hidden"value="TITLE_ID" name="field_title_id_NUMBER" id="field_title_id_NUMBER">'
@@ -287,7 +287,7 @@ class TrackSelectionHandler(GenericFormHandler):
         :rtype: -
 
         """
-        # print('Destructor of homepage handler called')
+        # print('Destructor of trackselection handler called')
         super().__del__()
 
     def GetParameterSet(self, param_set: dict):
@@ -300,7 +300,17 @@ class TrackSelectionHandler(GenericFormHandler):
 
         """
         super().GetParameterSet(param_set)
-        print('Homepage handler executed')
+        print('trackselection handler executed')
+
+    def ExtractParameter(self):
+        decodedParameter = []
+        list = self.m_ParameterSet.keys()
+        for key in list:
+            a = key.decode("utf-8")
+            index = a.rfind()
+            a = a [0, index - 1]
+            decodedParameter.append(a)
+        return decodedParameter
 
     def CreateResponse(self) -> Tuple[bool, str]:
         """create html response
@@ -309,52 +319,26 @@ class TrackSelectionHandler(GenericFormHandler):
         :rtype: boolean, string
 
         """
-        print('CreateResponse of homepage handler called')
+        print('CreateResponse of trackselection handler called')
         file_content = []
         retVal = False
         try:
-            file_content = open('./html/homepage.html').read()
             retVal = True
         except OSError:
             print("Unable to open file")
 
         if retVal:
             logged_in = True
+            self.ExtractParameter()
             # mycursor = self.m_Mycursor
             # db = self.m_Db
-            track_name = self.m_ParameterSet[b'homepage_songtitle'].decode("utf-8")
-            track_data = self.m_Spy.GetAttributes(track_name)
-            track_uri = []
-            artist_info = []
-            artist_uri = []
+            #mycursor.execute("INSERT INTO trackdata (userid, artistid, titleid, trackid, genreid, popularity, danceability, energy, liveness, mode, timesignature, tempo, valence) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",(username, password, useremail))
+            #b.commit()
+            print(list(self.m_ParameterSet.values()))
 
-            for i in range(0, len(track_data)):
-                track_uri.append(track_data[i]['uri'])
-                artist_uri.append(track_data[i]['artist_uri'])
-
-            artist_info = self.m_Spy.GetArtistInfo(artist_uri)
-            track_analysis = self.m_Spy.GetTrackAnalytics(track_uri[0])
-
-            music_list = str()
-            for i in range(0, len(track_data)):
-                table_row = self.m_HTMLTableRowDescriptor
-                table_row = table_row.replace('ARTIST_ID', track_data[i]['artist'])
-                table_row = table_row.replace('TITLE_ID', track_data[i]['track'])
-                table_row = table_row.replace('TRACK_ID', track_data[i]['track_id'])
-                table_row = table_row.replace('GENRE_ID', ','.join(artist_info[i]['genres']))
-                table_row = table_row.replace('POPULARITY', str(track_data[i]['popularity']))
-                table_row = table_row.replace('NUMBER', str(i))
-                # table_row = table_row.replace('URI', track_data[i]['uri'])
-                table_row = table_row.replace('ACTION', str(i))
-                music_list = music_list + table_row
-
-            table_header = self.m_HTMLHeaderLine
-            table_header = table_header.replace('<!-- header_attachment_anchor -->', music_list)
-
-            table = self.m_HTMLTableResponse
-            table = table.replace('<!-- table_content_anchor -->', table_header)
-            file_content = file_content.replace('<!-- homepage_result_table -->', table)
+            file_content = open('./html/homepage.html').read()
         return retVal, file_content
+
 
 class LoginHandler(GenericFormHandler):
     def __init__(self):
