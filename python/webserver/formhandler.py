@@ -5,7 +5,6 @@ from typing import Tuple
 
 import python.rema
 
-
 class GenericFormHandler:
     """This is a conceptual class representation of a generic form interface.
     Main purpose of the class is parameter extraction related to the opened web page and
@@ -119,7 +118,7 @@ class HomepageHandler(GenericFormHandler):
         '<td>POPULARITY</td>'
         '<td><form name="TABLE_FORM_ACTION" action="" method="post">'
         '<button>Track_ACTION</button>'
-        '<input type="hidden" id="FormIdentifier" name="FormIdentifier" value="trackselection_form">'
+        '<input type="hidden" id="FormIdentifier_NUMBER" name="FormIdentifier_NUMBER" value="trackselection_form">'
         '<input type="hidden" value="TRACK_ID" name="field_track_id_NUMBER" id="field_track_id_NUMBER">'
         '<input type="hidden" value="ARTIST_ID_NUMBER" name="field_artist_id_NUMBER" id="field_artist_id_NUMBER">'
         '<input type="hidden"value="TITLE_ID" name="field_title_id_NUMBER" id="field_title_id_NUMBER">'
@@ -248,7 +247,7 @@ class TrackSelectionHandler(GenericFormHandler):
         '<td>POPULARITY</td>'
         '<td><form name="TABLE_FORM_ACTION" action="" method="post">'
         '<button>Track_ACTION</button>'
-        '<input type="hidden" id="FormIdentifier" name="FormIdentifier" value="homepage_form">'
+        '<input type="hidden" id="FormIdentifier_NUMBER" name="FormIdentifier_NUMBER" value="homepage_form">'
         '<input type="hidden" value="TRACK_ID" name="field_track_id_NUMBER" id="field_track_id_NUMBER">'
         '<input type="hidden" value="ARTIST_ID_NUMBER" name="field_artist_id_NUMBER" id="field_artist_id_NUMBER">'
         '<input type="hidden"value="TITLE_ID" name="field_title_id_NUMBER" id="field_title_id_NUMBER">'
@@ -303,14 +302,14 @@ class TrackSelectionHandler(GenericFormHandler):
         print('trackselection handler executed')
 
     def ExtractParameter(self):
-        decodedParameter = []
+        DecodedParameter = []
         list = self.m_ParameterSet.keys()
         for key in list:
             a = key.decode("utf-8")
             index = a.rfind()
-            a = a [0, index - 1]
-            decodedParameter.append(a)
-        return decodedParameter
+            a = a[0, index - 1]
+            DecodedParameter.append(a)
+        return DecodedParameter
 
     def CreateResponse(self) -> Tuple[bool, str]:
         """create html response
@@ -330,6 +329,7 @@ class TrackSelectionHandler(GenericFormHandler):
         if retVal:
             logged_in = True
             self.ExtractParameter()
+            print(DecodedParameter)
             # mycursor = self.m_Mycursor
             # db = self.m_Db
             #mycursor.execute("INSERT INTO trackdata (userid, artistid, titleid, trackid, genreid, popularity, danceability, energy, liveness, mode, timesignature, tempo, valence) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",(username, password, useremail))
