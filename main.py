@@ -1,17 +1,21 @@
-
 from http.server import BaseHTTPRequestHandler
 from python.rema import remotedatabase as rema
+from python.eddi import Eddi
 import logging
 import urllib.parse
 import python.webserver
 import python.webserver.formhandler
 import python.tools.mulo as mulo
 
+
 class MyServer(BaseHTTPRequestHandler):
     m_FormHandler = {}
     m_CallbackHandler = {}
+    m_UserProfileInterface = None
+    m_TrackProfileInterface = None
+
     def __init__(self, *arguments):
-        """Constructor, resets the formular handler dictionary
+        """Constructor, resets the formula handler dictionary
 
         :return: -
         :rtype: -
@@ -19,15 +23,19 @@ class MyServer(BaseHTTPRequestHandler):
         """
         spy = StartupRema()
         self.m_CallbackHandler = MyServer.m_FormHandler.copy()
-        profileinfo = {'username': 'empty', 'password': 'empty', 'email': 'empty'}
+        dbaccess = Eddi()
+
+        user_interface = dbaccess.GetUserAccessInterface()
+        track_profile_interface = dbaccess.GetTrackAttributesAccessInterface()
+        profile_info = {'validity': False,  'username': 'empty', 'password': 'empty', 'email': 'empty'}
+
         for i in self.m_CallbackHandler:
             self.m_CallbackHandler[i].RegisterSpy(spy)
+            self.m_CallbackHandler[i].RegisterUserAccessInterface(user_interface)
+            self.m_CallbackHandler[i].RegisterTrackAttributesAccessInterface(track_profile_interface)
+            self.m_CallbackHandler[i].RegisterProfile(profile_info)
 
-		#self.m_CallbackHandler[i].RegisterProfile(profileinfo)
         BaseHTTPRequestHandler.__init__(self, *arguments)
-
-            
-
 
     def __del__(self):
         """Destructor
@@ -78,7 +86,7 @@ class MyServer(BaseHTTPRequestHandler):
                 self.send_response(404)
             self.end_headers()
             self.wfile.write(bytes(file_to_open, 'utf-8'))
-        return #BaseHTTPRequestHandler.do_GET(self)
+        return  # BaseHTTPRequestHandler.do_GET(self)
 
     def do_POST(self):
         """Handles post requests of a web client. Extracts key value pairs of the request (has to be extended)
@@ -142,6 +150,7 @@ class MyServer(BaseHTTPRequestHandler):
         else:
             logging.error('Error: Parameter {} already registered'.format(formidentifier))
 
+
 def StartupServer():
     """Starts the web server
 
@@ -159,6 +168,7 @@ def StartupServer():
 
     server.Start(MyServer)
 
+
 def StartupRema():
     """Initializes spotify connection
 
@@ -167,11 +177,8 @@ def StartupRema():
         """
     logging.info('Starting up rema')
     spy = rema()
-    # just for testing
-    # [a,b,c,d] = spy.GetAttributes('Nothing else matters')
-    # for i,j,k,l in zip(a,b,c,d):
-    #    print(i, j, k, l)
     return spy
+
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':

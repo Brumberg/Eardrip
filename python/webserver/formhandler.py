@@ -1,9 +1,9 @@
 from abc import ABCMeta, abstractmethod
 from typing import Tuple
-import mysql.connector
-from typing import Tuple
-
 import python.rema
+import logging
+import logging.handlers
+import re
 
 
 class GenericFormHandler:
@@ -16,13 +16,15 @@ class GenericFormHandler:
     """storage for parameter request
 
     """
-    m_ParameterSet = dict()
-    m_profileinfo = dict()
+    m_ParameterSet = None
+    m_ProfileInfo = None
+    m_UserAccessInterface = None
+    m_TrackAttributesAccessInterface = None
 
     """spotify handler
 
     """
-    m_Spy = []
+    m_Spy = None
 
     def __init__(self):
         """Constructor, resets the form handler dictionary
@@ -31,16 +33,7 @@ class GenericFormHandler:
         :rtype: -
 
         """
-        m_ParameterSet = {}
-
-        # connects python to the database
-        self.m_Db = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            passwd="Root",
-            database="eardrip_users"
-        )
-        self.m_Mycursor = self.m_Db.cursor()
+        self.m_ParameterSet = None
 
     def __del__(self):
         """Destructor, resets the form handler dictionary
@@ -49,18 +42,18 @@ class GenericFormHandler:
         :rtype: -
 
         """
-        self.m_ParameterSet = {}
+        self.m_ParameterSet = None
 
-    def RegisterProfile(self, profileinfo):
+    def RegisterProfile(self, profile_info):
         """Register profile object
 
-        :param profile: object registers user profile info
+        :param profile_info: object registers user profile info
         :type: profile object
         :return: -
         :rtype: -
 
         """
-        self.m_profileinfo = profileinfo
+        self.m_ProfileInfo = profile_info
 
     def RegisterSpy(self, spy):
         """Register spy (spotify) object
@@ -73,6 +66,28 @@ class GenericFormHandler:
         """
         self.m_Spy = spy
 
+    def RegisterUserAccessInterface(self, interface):
+        """Register userinterface  object
+
+        :param spy: object handles requests/inqueries to/from spotify
+        :type: spy object
+        :return: -
+        :rtype: -
+
+        """
+        self.m_UserAccessInterface = interface
+
+    def RegisterTrackAttributesAccessInterface(self, interface):
+        """Register spy (spotify) object
+
+        :param interface:
+        :type: interface object
+        :return: -
+        :rtype: -
+
+        """
+        self.m_TrackAttributesAccessInterface = interface
+
     @abstractmethod
     def GetParameterSet(self, param_set: dict):
         """extract parameter set and store it
@@ -83,7 +98,6 @@ class GenericFormHandler:
         :rtype: -
 
         """
-        # print('Generic GetParamSet callback executed')
         self.m_ParameterSet = param_set.copy()
 
     @abstractmethod
@@ -94,9 +108,8 @@ class GenericFormHandler:
         :rtype: boolean, string
 
         """
-        # print('Generic CreateResponse executed')
-        logged_in = False
         pass
+
 
 class HomepageHandler(GenericFormHandler):
     m_HTMLHeaderLine = (
@@ -148,7 +161,6 @@ class HomepageHandler(GenericFormHandler):
         :rtype: -
 
         """
-        # print('Constructor of homepage handler called')
         super().__init__()
 
     def __del__(self):
@@ -158,7 +170,6 @@ class HomepageHandler(GenericFormHandler):
         :rtype: -
 
         """
-        # print('Destructor of homepage handler called')
         super().__del__()
 
     def GetParameterSet(self, param_set: dict):
@@ -171,7 +182,6 @@ class HomepageHandler(GenericFormHandler):
 
         """
         super().GetParameterSet(param_set)
-        print('Homepage handler executed')
 
     def CreateResponse(self) -> Tuple[bool, str]:
         """create html response
@@ -180,19 +190,15 @@ class HomepageHandler(GenericFormHandler):
         :rtype: boolean, string
 
         """
-        print('CreateResponse of homepage handler called')
         file_content = []
         retVal = False
         try:
             file_content = open('./html/homepage.html').read()
             retVal = True
         except OSError:
-            print("Unable to open file")
+            logging.debug('Homepage handler executed')
 
         if retVal:
-            logged_in = True
-            mycursor = self.m_Mycursor
-            db = self.m_Db
             track_name = self.m_ParameterSet[b'homepage_songtitle'].decode("utf-8")
             track_data = self.m_Spy.GetAttributes(track_name)
             track_uri = []
@@ -217,7 +223,7 @@ class HomepageHandler(GenericFormHandler):
                 table_row = table_row.replace('NUMBER', str(i))
                 # table_row = table_row.replace('URI', track_data[i]['uri'])
                 table_row = table_row.replace('ACTION', str(i))
-                music_list = music_list+table_row
+                music_list = music_list + table_row
 
             table_header = self.m_HTMLHeaderLine
             table_header = table_header.replace('<!-- header_attachment_anchor -->', music_list)
@@ -226,6 +232,7 @@ class HomepageHandler(GenericFormHandler):
             table = table.replace('<!-- table_content_anchor -->', table_header)
             file_content = file_content.replace('<!-- homepage_result_table -->', table)
         return retVal, file_content
+
 
 class TrackSelectionHandler(GenericFormHandler):
     m_HTMLHeaderLine = (
@@ -277,7 +284,6 @@ class TrackSelectionHandler(GenericFormHandler):
         :rtype: -
 
         """
-        # print('Constructor of homepage handler called')
         super().__init__()
 
     def __del__(self):
@@ -287,7 +293,6 @@ class TrackSelectionHandler(GenericFormHandler):
         :rtype: -
 
         """
-        # print('Destructor of trackselection handler called')
         super().__del__()
 
     def GetParameterSet(self, param_set: dict):
@@ -300,17 +305,24 @@ class TrackSelectionHandler(GenericFormHandler):
 
         """
         super().GetParameterSet(param_set)
-        print('trackselection handler executed')
 
-    def ExtractParameter(self):
-        decodedParameter = []
-        list = self.m_ParameterSet.keys()
-        for key in list:
+    def ConvertDictionary(self):
+        """returns a dictionary containing the database elements
+
+        :return: status, html content
+        :rtype: boolean, string
+
+        """
+
+        dict = {}
+        for key, value in self.m_ParameterSet.items():
             a = key.decode("utf-8")
-            index = a.rfind()
-            a = a [0, index - 1]
-            decodedParameter.append(a)
-        return decodedParameter
+            match = re.search(r"_\d$", a)
+            if match:
+                a = a[0:match.start()]
+
+            dict[a] = value.decode("utf-8")
+        return dict
 
     def CreateResponse(self) -> Tuple[bool, str]:
         """create html response
@@ -319,36 +331,35 @@ class TrackSelectionHandler(GenericFormHandler):
         :rtype: boolean, string
 
         """
-        print('CreateResponse of trackselection handler called')
         file_content = []
-        retVal = False
-        try:
-            retVal = True
-        except OSError:
-            print("Unable to open file")
+        return_value = False
 
-        if retVal:
-            logged_in = True
-            self.ExtractParameter()
-            # mycursor = self.m_Mycursor
-            # db = self.m_Db
-            #mycursor.execute("INSERT INTO trackdata (userid, artistid, titleid, trackid, genreid, popularity, danceability, energy, liveness, mode, timesignature, tempo, valence) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",(username, password, useremail))
-            #b.commit()
-            print(list(self.m_ParameterSet.values()))
+        if self.m_ParameterSet:
+            dataset = self.ConvertDictionary()
+            if (self.m_TrackAttributesAccessInterface.write(dataset)):
+                try:
+                    file_content = open('./html/homepage.html').read()
+                except OSError:
+                    return_value = False
+                    logging.error('Unable to open home page')
+            else:
+                return_value = False
+                logging.error('Dictionary is empty')
+        else:
+            return_value = False
+            logging.error('Dictionary is empty')
 
-            file_content = open('./html/homepage.html').read()
-        return retVal, file_content
+        return return_value, file_content
 
 
 class LoginHandler(GenericFormHandler):
     def __init__(self):
-        """Constructor, resets the formular handler dictionary
+        """Constructor, resets the formula handler dictionary
 
         :return: -
         :rtype: -
 
         """
-        # print('Constructor of login handler called')
         super().__init__()
 
     def __del__(self):
@@ -358,12 +369,12 @@ class LoginHandler(GenericFormHandler):
         :rtype: -
 
         """
-        # print('Destructor of login handler called')
         super().__del__()
 
     def GetParameterSet(self, param_set: dict):
         """extract parameter set and store it
 
+        :param param_set:
         :param paramset: dictionarycontaining all parameters
         :type: dict
         :return: -
@@ -371,9 +382,6 @@ class LoginHandler(GenericFormHandler):
 
         """
         super().GetParameterSet(param_set)
-        print('GetParameterSet of login handler called')
-        for i in param_set:
-            print(i)
 
     def CreateResponse(self) -> Tuple[bool, str]:
         """create html response
@@ -382,40 +390,49 @@ class LoginHandler(GenericFormHandler):
         :rtype: boolean, string
 
         """
-        print('CreateResponse of login handler called')
         file_content = []
-        retVal = False
+        return_value = False
         try:
-            mycursor = self.m_Mycursor
-            db = self.m_Db
             login_username = self.m_ParameterSet[b'login_usernameid'].decode('utf-8')
             login_password = self.m_ParameterSet[b'login_passwordid'].decode('utf-8')
+            profile_data = {'validity': False, 'username': login_username, 'password': login_password,
+                            'email': 'unknown'}
 
+            page_to_open = './html/index.html'
             # searches database for the username
-            mycursor.execute("SELECT username FROM user WHERE username = '%s'" % login_username)
-            real_login_username = mycursor.fetchone()
-            mycursor.reset()
-
-            mycursor.execute("SELECT password FROM user WHERE username = '%s'" % login_username)
-            real_login_password = mycursor.fetchone()
-            mycursor.reset()
-
-            if real_login_username == None:
-                print("INVALID USERNAME")
-                file_content = open('./html/index.html').read()
-
-            elif real_login_username == login_username and real_login_password == login_password:
-                print("SUCCESSFUL")
-                file_content = open('./html/homepage.html').read()
-                logged_in = True
+            success = self.m_UserAccessInterface.check(profile_data)
+            if success:
+                if profile_data['username'] is None:
+                    logging.debug("unknown user")
+                    return_value = False
+                    page_to_open = './html/index.html'
+                elif profile_data['password'] is None:
+                    logging.debug("no password")
+                    return_value = False
+                    page_to_open = './html/index.html'
+                elif profile_data['username'] == login_username and profile_data['password'] == login_password:
+                    logging.debug("log in successfull")
+                    return_value = True
+                    profile_data['validity'] = True
+                    page_to_open = './html/homepage.html'
+                elif profile_data['username'] != login_username:
+                    return_value = False
+                    logging.debug("unknown user")
+                    page_to_open = './html/index.html'
+                else:
+                    return_value = False
+                    logging.debug("invalid password")
+                    page_to_open = './html/index.html'
             else:
-                print("INVALID PASSWORD")
-                file_content = open('./html/index.html').read()
+                page_to_open = './html/index.html'
+                return_value = False
 
-            retVal = True
+            file_content = open(page_to_open).read()
+
         except OSError:
-            print("Unable to open file")
-        return retVal, file_content
+            logging.error("Unable to open file")
+        return return_value, file_content
+
 
 class SignupHandler(GenericFormHandler):
     def __init__(self):
@@ -448,9 +465,6 @@ class SignupHandler(GenericFormHandler):
 
         """
         super().GetParameterSet(param_set)
-        print('GetParameterSet of signup handler called')
-        for i in param_set:
-            print(i)
 
     def CreateResponse(self) -> Tuple[bool, str]:
         """create html response
@@ -459,36 +473,41 @@ class SignupHandler(GenericFormHandler):
         :rtype: boolean, string
 
         """
-        print('CreateResponse of signup handler called')
         file_content = []
-        retVal = False
-        try:
-            mycursor = self.m_Mycursor
-            db = self.m_Db
-            signup_username = self.m_ParameterSet[b'signup_usernameid'].decode('utf-8')
-            signup_password = self.m_ParameterSet[b'signup_passwordid'].decode('utf-8')
-            signup_email = self.m_ParameterSet[b'signup_emailid'].decode('utf-8')
 
-            print(signup_username)
-            print(signup_password)
-            print(signup_email)
+        signup_username = self.m_ParameterSet[b'signup_usernameid'].decode('utf-8')
+        signup_password = self.m_ParameterSet[b'signup_passwordid'].decode('utf-8')
+        signup_email = self.m_ParameterSet[b'signup_emailid'].decode('utf-8')
+        profile_dictionary = dict(zip(['validity', 'username', 'password', 'email'],
+                                      [False, signup_username, signup_password, signup_email]))
+        #print(signup_username)
+        #print(signup_password)
+        #print(signup_email)
 
+        # adds the variables to the user table in the database
+        profile_data = {'validity': False, 'username': signup_username, 'password': signup_password,
+                        'email': signup_email}
 
-            # adds the variables to the user table in the database
-            mycursor.execute("INSERT INTO user (username, password, email) VALUES (%s, %s, %s)", (signup_username, signup_password, signup_email))
-            db.commit()
+        return_value = self.m_DataBase.m_UserAccessInterface.read(profile_data)
+        if return_value:
+            return_value = self.m_Parent.m_DataBase.m_UserAccessInterface.write(profile_data)
+            if return_value:
+                profile_dictionary['validity'] = True
+                file_content = open('./html/profile.html').read()
+            else:
+                profile_dictionary['validity'] = False
+                logging.error("Unable to access data base")
+                self.send_response(404)
 
-            logged_in = True
-            file_content = open('./html/profile.html').read()
-            retVal = True
-        except OSError:
-            print("Unable to open file")
-            self.send_response(404)
-        return retVal, file_content
+            self.m_ProfileInfo.update(profile_dictionary)
+        else:
+            logging.error('Unable to access database')
+
+        self.m_ProfileInfo.update(profile_data)
+        return return_value, file_content
 
 
 class ProfileHandler(GenericFormHandler):
-
     m_HTMLHeaderLine = (
         '<tr>'
         '<td>USERNAME</td>'
@@ -517,18 +536,15 @@ class ProfileHandler(GenericFormHandler):
         :rtype: -
 
         """
-
-        # print('Constructor of profile handler called')
         super().__init__()
 
     def __del__(self):
-        """Destructor, resets the formular handler dictionary
+        """Destructor, resets the formula handler dictionary
 
         :return: -
         :rtype: -
 
         """
-        # print('Destructor of profile handler called')
         super().__del__()
 
     def GetParameterSet(self, param_set: dict):
@@ -541,9 +557,6 @@ class ProfileHandler(GenericFormHandler):
 
         """
         super().GetParameterSet(param_set)
-        print('GetParameterSet of profile handler called')
-        for i in param_set:
-            print(i)
 
     def CreateResponse(self) -> Tuple[bool, str]:
         """create html response
@@ -552,48 +565,40 @@ class ProfileHandler(GenericFormHandler):
         :rtype: boolean, string
 
         """
-        print('CreateResponse of profile handler called')
         file_content = []
-        retVal = False
-        try:
-            logged_in = True
-            file_content = open('./html/profile.html').read()
-            retVal = True
-        except OSError:
-            print("Unable to open file")
+        return_value = False
+        if self.m_ProfileInfo['validate']:
+            try:
+                file_content = open('./html/profile.html').read()
+                return_value = True
+            except OSError:
+                return_value = False
+                logging.error("Unable to open profile page")
 
-        if retVal:
-            mycursor = self.m_Mycursor
-            db = self.m_Db
-            username1 = ("sam cliffe")
+            if return_value:
+                details_list = str()
+                table_row = self.m_HTMLTableRowDescriptor
+                table_row = table_row.replace('USERNAME', self.m_ProfileInfo['username'])
+                table_row = table_row.replace('PASSWORD', self.m_ProfileInfo['password'])
+                table_row = table_row.replace('EMAIL', self.m_ProfileInfo['email'])
+                details_list = table_row
 
-            mycursor.execute("SELECT password FROM user WHERE username = '%s'" % username1)
-            profile_password = mycursor.fetchone()
-            profile_password = ''.join(profile_password)
-            mycursor.reset()
+                table_header = self.m_HTMLHeaderLine
+                table_header = table_header.replace('<!-- header_attachment_anchor -->', details_list)
 
-            mycursor.execute("SELECT email FROM user WHERE username = '%s'" % username1)
-            profile_email = mycursor.fetchone()
-            profile_email = ''.join(profile_email)
+                table = self.m_HTMLTableResponse
+                table = table.replace('<!-- table_content_anchor -->', table_header)
+                file_content = file_content.replace('<!-- profile_result_table -->', table)
+            else:
+                try:
+                    file_content = open('./html/index.html').read()
+                    return_value = True
+                except OSError:
+                    return_value = False
+                    logging.error("Unable to open index page")
 
-            print(username1)
-            print(profile_password)
-            print(profile_email)
+        return return_value, file_content
 
-            details_list = str()
-            table_row = self.m_HTMLTableRowDescriptor
-            table_row = table_row.replace('USERNAME', username1)
-            table_row = table_row.replace('PASSWORD', profile_password)
-            table_row = table_row.replace('EMAIL', profile_email)
-            details_list = details_list+table_row
-
-            table_header = self.m_HTMLHeaderLine
-            table_header = table_header.replace('<!-- header_attachment_anchor -->', details_list)
-
-            table = self.m_HTMLTableResponse
-            table = table.replace('<!-- table_content_anchor -->', table_header)
-            file_content = file_content.replace('<!-- profile_result_table -->', table)
-        return retVal, file_content
 
 class LogoutHandler(GenericFormHandler):
     def __init__(self):
@@ -603,7 +608,6 @@ class LogoutHandler(GenericFormHandler):
         :rtype: -
 
         """
-        # print('Constructor of logout handler called')
         super().__init__()
 
     def __del__(self):
@@ -613,7 +617,6 @@ class LogoutHandler(GenericFormHandler):
         :rtype: -
 
         """
-        # print('Destructor of logout handler called')
         super().__del__()
 
     def GetParameterSet(self, param_set: dict):
@@ -626,9 +629,6 @@ class LogoutHandler(GenericFormHandler):
 
         """
         super().GetParameterSet(param_set)
-        print('GetParameterSet of logout handler called')
-        for i in param_set:
-            print(i)
 
     def CreateResponse(self) -> Tuple[bool, str]:
         """create html response
@@ -637,11 +637,10 @@ class LogoutHandler(GenericFormHandler):
         :rtype: boolean, string
 
         """
-        print('CreateResponse of logout handler called')
+        logging.debug('CreateResponse of logout handler called')
         file_content = []
-        retVal = False
-        #try:
-            #logged_in = False
+        return False
+
 
 class SongHandler(GenericFormHandler):
     def __init__(self):
@@ -674,9 +673,6 @@ class SongHandler(GenericFormHandler):
 
         """
         super().GetParameterSet(param_set)
-        print('GetParameterSet of logout handler called')
-        for i in param_set:
-            print(i)
 
     def CreateResponse(self) -> Tuple[bool, str]:
         """create html response
@@ -685,9 +681,7 @@ class SongHandler(GenericFormHandler):
         :rtype: boolean, string
 
         """
-        print('CreateResponse of logout handler called')
-        file_content = []
-        retVal = False
-        #try:
-            #logged_in = False
+        logging.debug('CreateResponse of logout handler called')
 
+        logging.debug('CreateResponse of logout handler called')
+        return False
