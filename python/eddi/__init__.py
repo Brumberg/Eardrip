@@ -128,7 +128,7 @@ class Eddi:
         :rtype: -
 
         """
-        self.m_Database.close()
+        self.m_DataBase.close()
 
     def GetUserAccessInterface(self) -> IUserProfile:
         """returns interface to access user data
@@ -253,18 +253,28 @@ class Eddi:
             return_value = True
             try:
                 cursor = self.m_Parent.m_DataBase.cursor()
-                cursor.execute("SELECT username FROM user WHERE username = '%s'" % dict['username'])
+                cursor.execute("SELECT username FROM user WHERE username = '%s'" % param_set['username'])
                 real_login_username = cursor.fetchone()
                 cursor.reset()
-                cursor.execute("SELECT password FROM user WHERE username = '%s'" % dict['username'])
+                cursor.execute("SELECT password FROM user WHERE username = '%s'" % param_set['username'])
                 real_login_password = cursor.fetchone()
                 cursor.reset()
-                cursor.execute("SELECT email FROM user WHERE username = '%s'" % dict['username'])
+                cursor.execute("SELECT email FROM user WHERE username = '%s'" % param_set['username'])
                 real_login_email = cursor.fetchone()
-                cursor.close()
-                dict['username'] = real_login_username
-                dict['password'] = real_login_password
-                dict['email'] = real_login_email
+                if real_login_username is not None:
+                    param_set['username'] = real_login_username[0]
+                else:
+                    param_set['username'] = ''
+
+                if real_login_password is not None:
+                    param_set['password'] = real_login_password[0]
+                else:
+                    param_set['password'] = ''
+
+                if real_login_email is not None:
+                    param_set['email'] = real_login_email[0]
+                else:
+                    param_set['email'] = ''
             except:
                 return_value = False
             return return_value
@@ -284,10 +294,10 @@ class Eddi:
             try:
                 cursor = self.m_Parent.m_DataBase.cursor()
                 cursor.execute("INSERT INTO user (username, password, email) VALUES (%s, %s, %s)",
-                               (dict['username'], dict['password'], dict['email']))
+                               (param_set['username'], param_set['password'], param_set['email']))
                 self.m_Parent.m_DataBase.commit()
             except:
                 return_value = False
-            cursor.close()
+
             return return_value
 

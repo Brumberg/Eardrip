@@ -336,7 +336,8 @@ class TrackSelectionHandler(GenericFormHandler):
 
         if self.m_ParameterSet:
             dataset = self.ConvertDictionary()
-            if (self.m_TrackAttributesAccessInterface.write(dataset)):
+            dataset.pop('FormIdentifier', None)
+            if self.m_TrackAttributesAccessInterface.write(dataset):
                 try:
                     file_content = open('./html/homepage.html').read()
                 except OSError:
@@ -392,45 +393,54 @@ class LoginHandler(GenericFormHandler):
         """
         file_content = []
         return_value = False
-        try:
-            login_username = self.m_ParameterSet[b'login_usernameid'].decode('utf-8')
-            login_password = self.m_ParameterSet[b'login_passwordid'].decode('utf-8')
-            profile_data = {'validity': False, 'username': login_username, 'password': login_password,
+        if b'login_usernameid' in self.m_ParameterSet and b'login_passwordid' in self.m_ParameterSet:
+            try:
+                login_username = self.m_ParameterSet[b'login_usernameid'].decode('utf-8')
+                login_password = self.m_ParameterSet[b'login_passwordid'].decode('utf-8')
+                profile_data = {'validity': False, 'username': login_username, 'password': login_password,
                             'email': 'unknown'}
 
-            page_to_open = './html/index.html'
-            # searches database for the username
-            success = self.m_UserAccessInterface.check(profile_data)
-            if success:
-                if profile_data['username'] is None:
-                    logging.debug("unknown user")
-                    return_value = False
-                    page_to_open = './html/index.html'
-                elif profile_data['password'] is None:
-                    logging.debug("no password")
-                    return_value = False
-                    page_to_open = './html/index.html'
-                elif profile_data['username'] == login_username and profile_data['password'] == login_password:
-                    logging.debug("log in successfull")
-                    return_value = True
-                    profile_data['validity'] = True
-                    page_to_open = './html/homepage.html'
-                elif profile_data['username'] != login_username:
-                    return_value = False
-                    logging.debug("unknown user")
-                    page_to_open = './html/index.html'
-                else:
-                    return_value = False
-                    logging.debug("invalid password")
-                    page_to_open = './html/index.html'
-            else:
                 page_to_open = './html/index.html'
-                return_value = False
+                # searches database for the username
+                success = self.m_UserAccessInterface.read(profile_data)
+                if success:
+                    if profile_data['username'] is None:
+                        logging.debug("unknown user")
+                        return_value = False
+                        page_to_open = './html/index.html'
+                    elif profile_data['password'] is None:
+                        logging.debug("no password")
+                        return_value = False
+                        page_to_open = './html/index.html'
+                    elif profile_data['username'] == login_username and profile_data['password'] == login_password:
+                        logging.debug("log in successfull")
+                        return_value = True
+                        profile_data['validity'] = True
+                        page_to_open = './html/homepage.html'
+                    elif profile_data['username'] != login_username:
+                        return_value = False
+                        logging.debug("unknown user")
+                        page_to_open = './html/index.html'
+                    else:
+                        return_value = False
+                        logging.debug("invalid password")
+                        page_to_open = './html/index.html'
+                else:
+                    page_to_open = './html/index.html'
+                    return_value = False
 
-            file_content = open(page_to_open).read()
+                file_content = open(page_to_open).read()
+            except OSError:
+                logging.error("Unable to open file")
+        else:
+            try:
+                page_to_open = './html/index.html'
+                file_content = open(page_to_open).read()
+                return_value = True
+            except OSError:
+                logging.error("Unable to open file")
+                file_content = []
 
-        except OSError:
-            logging.error("Unable to open file")
         return return_value, file_content
 
 
@@ -474,36 +484,73 @@ class SignupHandler(GenericFormHandler):
 
         """
         file_content = []
-
-        signup_username = self.m_ParameterSet[b'signup_usernameid'].decode('utf-8')
-        signup_password = self.m_ParameterSet[b'signup_passwordid'].decode('utf-8')
-        signup_email = self.m_ParameterSet[b'signup_emailid'].decode('utf-8')
-        profile_dictionary = dict(zip(['validity', 'username', 'password', 'email'],
+        if b'signup_usernameid' in self.m_ParameterSet and b'signup_passwordid' in self.m_ParameterSet:
+            signup_username = self.m_ParameterSet[b'signup_usernameid'].decode('utf-8')
+            signup_password = self.m_ParameterSet[b'signup_passwordid'].decode('utf-8')
+            signup_email = self.m_ParameterSet[b'signup_emailid'].decode('utf-8')
+            profile_dictionary = dict(zip(['validity', 'username', 'password', 'email'],
                                       [False, signup_username, signup_password, signup_email]))
-        #print(signup_username)
-        #print(signup_password)
-        #print(signup_email)
+            #print(signup_username)
+            #print(signup_password)
+            #print(signup_email)
 
-        # adds the variables to the user table in the database
-        profile_data = {'validity': False, 'username': signup_username, 'password': signup_password,
+            # adds the variables to the user table in the database
+            profile_data = {'validity': False, 'username': signup_username, 'password': signup_password,
                         'email': signup_email}
 
-        return_value = self.m_DataBase.m_UserAccessInterface.read(profile_data)
-        if return_value:
-            return_value = self.m_Parent.m_DataBase.m_UserAccessInterface.write(profile_data)
+            return_value = self.m_UserAccessInterface.read(profile_data)
             if return_value:
-                profile_dictionary['validity'] = True
-                file_content = open('./html/profile.html').read()
+                if signup_username != profile_data['username']:
+                    profile_data['username'] = signup_username
+                    profile_data['password'] = signup_password
+                    profile_data['email'] = signup_email
+                    return_value = self.m_UserAccessInterface.write(profile_data)
+                    if return_value:
+                        profile_dictionary['validity'] = True
+                        try:
+                            file_content = open('./html/profile.html').read()
+                        except OSError:
+                            logging.error("Unable to open file")
+                            return_value = False
+                            file_content = []
+                    else:
+                        logging.error("Unable to access data base")
+                        self.send_response(404)
+
+                    self.m_ProfileInfo.update(profile_dictionary)
+                else:
+                    logging.error('User already exist')
+                    return_value = True
+                    self.m_ProfileInfo.update(profile_data)
+                    try:
+                        file_content = open('./html/index.html').read()
+                    except OSError:
+                        logging.error("Unable to open file")
+                        return_value = False
+                        file_content = []
             else:
-                profile_dictionary['validity'] = False
-                logging.error("Unable to access data base")
-                self.send_response(404)
-
-            self.m_ProfileInfo.update(profile_dictionary)
+                logging.error("Unable to access data base - user table")
+                self.m_ProfileInfo['validate'] = False
+                page_to_open = './html/index.html'
+                try:
+                    file_content = open(page_to_open).read()
+                    return_value = True
+                except OSError:
+                    logging.error("Unable to open file")
+                    return_value = False
+                    file_content = []
         else:
-            logging.error('Unable to access database')
+            logging.error("Username or password undefined")
+            self.m_ProfileInfo['validate'] = False
+            page_to_open = './html/index.html'
+            try:
+                file_content = open(page_to_open).read()
+                return_value = True
+            except OSError:
+                logging.error("Unable to open file")
+                return_value = False
+                file_content = []
 
-        self.m_ProfileInfo.update(profile_data)
         return return_value, file_content
 
 
