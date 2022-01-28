@@ -201,11 +201,11 @@ class Eddi:
             return_value = False
             try:
                 cursor = self.m_Parent.m_DataBase.cursor()
-                qmarks = ', '.join('?' * len(dict))
-                qry = "INSERT INTO trackdata (%s) Values (%s)" % (qmarks, qmarks)
-                cursor.execute(qry, dict.keys() + dict.values())
+                qkeys = ', '.join(param_set.keys())
+                qvalues = ', '.join("'%s'" % s for s in param_set.values())
+                qry = "INSERT INTO trackdata (%s) Values (%s)" % (qkeys, qvalues)
+                cursor.execute(qry)
                 self.m_Parent.m_DataBase.commit()
-                cursor.close()
                 return_value = True
             except:
                 return_value = False

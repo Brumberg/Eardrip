@@ -140,11 +140,22 @@ class HomepageHandler(GenericFormHandler):
         '<input type="hidden"value="POPULARITY" name="field_popularity_NUMBER" id="field_popularity_NUMBER">'
         '<input type="hidden"value="DANCEABILITY" name="field_danceability_NUMBER" id="field_danceability_NUMBER">'
         '<input type="hidden"value="ENERGY" name="field_energy_NUMBER" id="field_energy_NUMBER">'
-        '<input type="hidden"value="LIVENESS" name="field_liveness_NUMBER" id="field_liveness_NUMBER">'
+        '<input type="hidden"value="KEY" name="field_key_NUMBER" id="field_key_NUMBER">'
+        '<input type="hidden"value="LOUDNESS" name="field_loudness_NUMBER" id="field_loudness_NUMBER">'
         '<input type="hidden"value="MODE" name="field_mode_NUMBER" id="field_mode_NUMBER">'
-        '<input type="hidden"value="TIME_SIGNATURE" name="field_time_signature_NUMBER" id="field_time_signature_NUMBER">'
-        '<input type="hidden"value="TEMPO" name="field_tempo_NUMBER" id="field_tempo_NUMBER">'
+        '<input type="hidden"value="SPEECHINESS" name="field_speechiness_NUMBER" id="field_speechiness_NUMBER">'
+        '<input type="hidden"value="ACOUSTICNESS" name="field_acousticness_NUMBER" id="field_acousticness_NUMBER">'
+        '<input type="hidden"value="INSTRUMENTALNESS" name="field_instrumentalness_NUMBER" id="field_instrumentalness_NUMBER">'
+        '<input type="hidden"value="LIVENESS" name="field_liveness_NUMBER" id="field_liveness_NUMBER">'
         '<input type="hidden"value="VALENCE" name="field_valence_NUMBER" id="field_valence_NUMBER">'
+        '<input type="hidden"value="TEMPO" name="field_tempo_NUMBER" id="field_tempo_NUMBER">'
+        '<input type="hidden"value="TYPE" name="field_type_NUMBER" id="field_type_NUMBER">'
+        '<input type="hidden"value="ATTRIB_ID" name="field_id_NUMBER" id="field_id_NUMBER">'
+        '<input type="hidden"value="ATTRIB_URI" name="field_uri_NUMBER" id="field_uri_NUMBER">'
+        '<input type="hidden"value="TRACK_HREF" name="field_track_href_NUMBER" id="field_trackhref_NUMBER">'
+        '<input type="hidden"value="ANALYSIS_URL" name="field_analysis_url_NUMBER" id="field_analysisurl_NUMBER">'
+        '<input type="hidden"value="DURATION_MS" name="field_duration_ms_NUMBER" id="field_durationms_NUMBER">'
+        '<input type="hidden"value="TIME_SIGNATURE" name="field_time_signature_NUMBER" id="field_time_signature_NUMBER">'  
         'ACTION</form></td>'
         '</tr>'
     )
@@ -210,7 +221,7 @@ class HomepageHandler(GenericFormHandler):
                 artist_uri.append(track_data[i]['artist_uri'])
 
             artist_info = self.m_Spy.GetArtistInfo(artist_uri)
-            track_analysis = self.m_Spy.GetTrackAnalytics(track_uri[0])
+            track_analysis = self.m_Spy.GetTrackAnalytics(track_uri)
 
             music_list = str()
             for i in range(0, len(track_data)):
@@ -220,10 +231,32 @@ class HomepageHandler(GenericFormHandler):
                 table_row = table_row.replace('TRACK_ID', track_data[i]['track_id'])
                 table_row = table_row.replace('GENRE_ID', ','.join(artist_info[i]['genres']))
                 table_row = table_row.replace('POPULARITY', str(track_data[i]['popularity']))
-                table_row = table_row.replace('NUMBER', str(i))
+
                 # table_row = table_row.replace('URI', track_data[i]['uri'])
+                table_row = table_row.replace('DANCEABILITY', str(track_analysis[i]['danceability']))
+                table_row = table_row.replace('ENERGY', str(track_analysis[i]['energy']))
+                table_row = table_row.replace('KEY', str(track_analysis[i]['key']))
+                table_row = table_row.replace('LOUDNESS', str(track_analysis[i]['loudness']))
+                table_row = table_row.replace('MODE', str(track_analysis[i]['mode']))
+                table_row = table_row.replace('SPEECHINESS', str(track_analysis[i]['speechiness']))
+                table_row = table_row.replace('ACOUSTICNESS', str(track_analysis[i]['acousticness']))
+                table_row = table_row.replace('INSTRUMENTALNESS', str(track_analysis[i]['instrumentalness']))
+                table_row = table_row.replace('LIVENESS', str(track_analysis[i]['liveness']))
+                table_row = table_row.replace('VALENCE', str(track_analysis[i]['valence']))
+                table_row = table_row.replace('TEMPO', str(track_analysis[i]['tempo']))
+                table_row = table_row.replace('TYPE', str(track_analysis[i]['type']))
+                table_row = table_row.replace('ATTRIB_ID', str(track_analysis[i]['id']))
+                table_row = table_row.replace('ATTRIB_URI', str(track_analysis[i]['uri']))
+                table_row = table_row.replace('TRACK_HREF', str(track_analysis[i]['track_href']))
+                table_row = table_row.replace('ANALYSIS_URL', str(track_analysis[i]['analysis_url']))
+                table_row = table_row.replace('DURATION_MS', str(track_analysis[i]['duration_ms']))
+                table_row = table_row.replace('TIME_SIGNATURE', str(track_analysis[i]['time_signature']))
+
+                table_row = table_row.replace('NUMBER', str(i))
                 table_row = table_row.replace('ACTION', str(i))
                 music_list = music_list + table_row
+
+
 
             table_header = self.m_HTMLHeaderLine
             table_header = table_header.replace('<!-- header_attachment_anchor -->', music_list)
@@ -255,7 +288,7 @@ class TrackSelectionHandler(GenericFormHandler):
         '<td>POPULARITY</td>'
         '<td><form name="TABLE_FORM_ACTION" action="" method="post">'
         '<button>Track_ACTION</button>'
-        '<input type="hidden" id="FormIdentifier" name="FormIdentifier" value="homepage_form">'
+        '<input type="hidden" id="FormIdentifier" name="FormIdentifier" value="trackselection_form">'
         '<input type="hidden" value="TRACK_ID" name="field_track_id_NUMBER" id="field_track_id_NUMBER">'
         '<input type="hidden" value="ARTIST_ID_NUMBER" name="field_artist_id_NUMBER" id="field_artist_id_NUMBER">'
         '<input type="hidden"value="TITLE_ID" name="field_title_id_NUMBER" id="field_title_id_NUMBER">'
@@ -263,11 +296,22 @@ class TrackSelectionHandler(GenericFormHandler):
         '<input type="hidden"value="POPULARITY" name="field_popularity_NUMBER" id="field_popularity_NUMBER">'
         '<input type="hidden"value="DANCEABILITY" name="field_danceability_NUMBER" id="field_danceability_NUMBER">'
         '<input type="hidden"value="ENERGY" name="field_energy_NUMBER" id="field_energy_NUMBER">'
-        '<input type="hidden"value="LIVENESS" name="field_liveness_NUMBER" id="field_liveness_NUMBER">'
+        '<input type="hidden"value="KEY" name="field_key_NUMBER" id="field_key_NUMBER">'
+        '<input type="hidden"value="LOUDNESS" name="field_loudness_NUMBER" id="field_loudness_NUMBER">'
         '<input type="hidden"value="MODE" name="field_mode_NUMBER" id="field_mode_NUMBER">'
-        '<input type="hidden"value="TIME_SIGNATURE" name="field_time_signature_NUMBER" id="field_time_signature_NUMBER">'
-        '<input type="hidden"value="TEMPO" name="field_tempo_NUMBER" id="field_tempo_NUMBER">'
+        '<input type="hidden"value="SPEECHINESS" name="field_speechiness_NUMBER" id="field_speechiness_NUMBER">'
+        '<input type="hidden"value="ACOUSTICNESS" name="field_acousticness_NUMBER" id="field_acousticness_NUMBER">'
+        '<input type="hidden"value="INSTRUMENTALNESS" name="field_instrumentalness_NUMBER" id="field_instrumentalness_NUMBER">'
+        '<input type="hidden"value="LIVENESS" name="field_liveness_NUMBER" id="field_liveness_NUMBER">'
         '<input type="hidden"value="VALENCE" name="field_valence_NUMBER" id="field_valence_NUMBER">'
+        '<input type="hidden"value="TEMPO" name="field_tempo_NUMBER" id="field_tempo_NUMBER">'
+        '<input type="hidden"value="TYPE" name="field_type_NUMBER" id="field_type_NUMBER">'
+        '<input type="hidden"value="ATTRIB_ID" name="field_id_NUMBER" id="field_id_NUMBER">'
+        '<input type="hidden"value="ATTRIB_URI" name="field_uri_NUMBER" id="field_uri_NUMBER">'
+        '<input type="hidden"value="TRACK_HREF" name="field_track_href_NUMBER" id="field_trackhref_NUMBER">'
+        '<input type="hidden"value="ANALYSIS_URL" name="field_analysis_url_NUMBER" id="field_analysisurl_NUMBER">'
+        '<input type="hidden"value="DURATION_MS" name="field_duration_ms_NUMBER" id="field_durationms_NUMBER">'
+        '<input type="hidden"value="TIME_SIGNATURE" name="field_time_signature_NUMBER" id="field_time_signature_NUMBER">'
         'ACTION</form></td>'
         '</tr>'
     )
@@ -340,6 +384,7 @@ class TrackSelectionHandler(GenericFormHandler):
             if self.m_TrackAttributesAccessInterface.write(dataset):
                 try:
                     file_content = open('./html/homepage.html').read()
+                    return_value = True
                 except OSError:
                     return_value = False
                     logging.error('Unable to open home page')
