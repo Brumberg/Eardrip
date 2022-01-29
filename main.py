@@ -75,6 +75,8 @@ class MyServer(BaseHTTPRequestHandler):
             set_access_denied_message = False
             if self.path == '/':
                 self.path = './html/index.html'
+            elif self.path == '/index.html':
+                self.path = './html/index.html'
             elif not self.m_ProfileInfo['validity']:
                 self.path = './html/index.html'
                 set_access_denied_message = True

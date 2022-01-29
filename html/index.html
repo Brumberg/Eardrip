@@ -18,54 +18,81 @@
     </head>
 
     <body>
-        <!--logo,login/sign up and profile navigation-->
-        <div class="navigation">
+
             <nav>
+                <!-- logo,login/sign up and profile navigation-->
                 <div class="logo">EARDRIP</div>
-                <div class="menu">
-                    <a href="homepage.html"><button>Homepage</button></a>
-
-                    <form name="logoutform" action="" onsubmit="return validateForm()" method="post">
-                        <a href="index.html"><button>Log Out</button></a>
-                        <input type="hidden" id="FormIdentifier" name="FormIdentifier" value="logout_form">
-                    </form>
-
-                    <a href="profile.html"><button>Profile</button></a>
-                </div>
             </nav>
-        </div>
 
+            <!-- log in and sgin up features -->
+            <div class="login_signup">
 
-        <!--search bar and search icon-->
-        <center><div class="searchbar_container">
-            <form name="homepageform" action="" onsubmit="return validateForm()" method="post">
-                <input type="hidden" id="FormIdentifier" name="FormIdentifier" value="homepage_form">
-                <div class="searchbar">
-                    <input type="search_input" name="homepage_songtitle" placeholder="Search by song name . . ." >
-                    <a href="homepage.html"><button><div class="fa fa-search"></div></button></a>
-                </div>
-            </form>
-        </div></center>
+                <form name="loginform" action="" onsubmit="return validateForm()" method="post">
+                    <div class="login">Log In
+                        <input type="text" name="login_usernameid" id="login_usernameid" value="" placeholder="username . . ." />
+                        <div class="login_username_check"><button>Check</button></div>
 
-        <!--filters-->
-        <div class="filters_container">
-            <div class="filters">
-                <button>by year</button>
-                <button>by artist name</button>
-                <button>by genre</button>
+                        <input type="text" name="login_passwordid" id="login_passwordid" value="" placeholder="password . . ." />
+                        <div class="login_password_check"><button>Check</button></div>
+                    </div>
+                <input type="hidden" id="FormIdentifier" name="FormIdentifier" value="login_form">
+                </form>
 
+                <form name="signupform" action=""  method="post">
+				    <div class="signup">Sign Up
+                        <script>
+                            function validateForm() {
+                                let retVal = validateUser();
+                                if (retVal != 0)
+                                {
+                                    retVal = validatePassword()
+                                }
+                                return retVal;
+                            }
+
+                            function validateUser() {
+                                let x = document.forms["signupform"]["signup_userid"].value;
+                                if (x == "") {
+                                    alert("Name must be filled out");
+                                    return false;
+                                }
+                                else if (x.length<5) {
+                                    alert("Name must consist of at least 5 letters");
+                                    return false;
+                                }
+                                else {
+                                    return true;
+                                }
+                            }
+
+                            function validatePassword() {
+                                let x = document.forms["signupform"]["signup_passwordid"].value;
+                                if (x == "") {
+                                    alert("Password must be filled in");
+                                    return false;
+                                }
+                                else if (x.length<5) {
+                                    alert("Password must consist of at least 5 letters");
+                                    return false;
+                                }
+                                else {
+                                    return true;
+                                }
+                            }
+		                </script>
+					    <input type="text" name="signup_usernameid" id="signup_usernameid" value="" placeholder="username . . ." />
+                        <div class="signup_username_check"><button>Check</button></div>
+
+                        <input type="text" name="signup_passwordid" id="signup_passwordid" value="" placeholder="password . . ." />
+                        <div class="signup_password_check"><button>Check</button></div>
+
+                        <input type="email" name="signup_emailid" id="signup_emailid" value="" placeholder="email . . ." />
+                        <input type="submit" value="send">
+                    </div>
+                <input type="hidden" id="FormIdentifier" name="FormIdentifier" value="signup_form">
+                </form>
+                <!-- LOGIN_STATUS -->
             </div>
-        </div>
-
-        <!--filters-->
-        <div class="searchresults">
-            <form name="homepageform" action="" onsubmit="return validateForm()" method="post">
-                <button>
-                <!-- homepage_result_table -->
-                </button>
-                <input type="hidden" id="FormIdentifier" name="FormIdentifier" value="song_form">
-            </form>
-        </div>
     </body>
 
 </html>

@@ -538,7 +538,27 @@ class SignupHandler(GenericFormHandler):
 
         """
         file_content = []
-        if b'signup_usernameid' in self.m_ParameterSet and b'signup_passwordid' in self.m_ParameterSet:
+        if b'signup_usernameid' not in self.m_ParameterSet or b'signup_passwordid' not in self.m_ParameterSet or b'signup_emailid' not in self.m_ParameterSet:
+            logging.error('Username or password undefined')
+            self.m_ProfileInfo['validate'] = False
+            error_message = None
+            if b'signup_usernameid' not in self.m_ParameterSet:
+                error_message = 'Please enter a valid user name.'
+            elif b'signup_passwordid' not in self.m_ParameterSet:
+                error_message = 'Please enter a password.'
+            else:
+                error_message = 'Please enter an email address.'
+
+            page_to_open = './html/index.html'
+            try:
+                file_content = open(page_to_open).read()
+                file_content = file_content.replace('<!-- LOGIN_STATUS -->', '<b>' + error_message + '</b>')
+                return_value = True
+            except OSError:
+                logging.error("Unable to open file")
+                return_value = False
+                file_content = []
+        else:
             signup_username = self.m_ParameterSet[b'signup_usernameid'].decode('utf-8')
             signup_password = self.m_ParameterSet[b'signup_passwordid'].decode('utf-8')
             signup_email = self.m_ParameterSet[b'signup_emailid'].decode('utf-8')
@@ -563,13 +583,15 @@ class SignupHandler(GenericFormHandler):
                         profile_dictionary['validity'] = True
                         try:
                             file_content = open('./html/profile.html').read()
+                            UpdateProfile(file_content)
                         except OSError:
                             logging.error("Unable to open file")
                             return_value = False
                             file_content = []
                     else:
                         logging.error("Unable to access data base")
-                        self.send_response(404)
+                        return_value = False
+                        file_content = []
 
                     self.m_ProfileInfo.update(profile_dictionary)
                 else:
@@ -578,6 +600,8 @@ class SignupHandler(GenericFormHandler):
                     self.m_ProfileInfo.update(profile_data)
                     try:
                         file_content = open('./html/index.html').read()
+                        file_content = file_content.replace('<!-- LOGIN_STATUS -->', 'Username is already registered. '
+                                                                                     'Use a different user name.')
                     except OSError:
                         logging.error("Unable to open file")
                         return_value = False
@@ -588,22 +612,13 @@ class SignupHandler(GenericFormHandler):
                 page_to_open = './html/index.html'
                 try:
                     file_content = open(page_to_open).read()
+                    file_content = file_content.replace('<!-- LOGIN_STATUS -->', 'Unable to establish connection to '
+                                                                                 'database.')
                     return_value = True
                 except OSError:
                     logging.error("Unable to open file")
                     return_value = False
                     file_content = []
-        else:
-            logging.error("Username or password undefined")
-            self.m_ProfileInfo['validate'] = False
-            page_to_open = './html/index.html'
-            try:
-                file_content = open(page_to_open).read()
-                return_value = True
-            except OSError:
-                logging.error("Unable to open file")
-                return_value = False
-                file_content = []
 
         return return_value, file_content
 
@@ -648,6 +663,38 @@ class ProfileHandler(GenericFormHandler):
         """
         super().__del__()
 
+    def Update(self) -> Tuple[bool, str]:
+        try:
+            file_content = open('./html/profile.html').read()
+            return_value = True
+        except OSError:
+            return_value = False
+            file_content = []
+            logging.error("Unable to open profile page")
+
+        if return_value:
+            details_list = str()
+            table_row = self.m_HTMLTableRowDescriptor
+            table_row = table_row.replace('USERNAME', self.m_ProfileInfo['username'])
+            table_row = table_row.replace('PASSWORD', self.m_ProfileInfo['password'])
+            table_row = table_row.replace('EMAIL', self.m_ProfileInfo['email'])
+            details_list = table_row
+
+            table_header = self.m_HTMLHeaderLine
+            table_header = table_header.replace('<!-- header_attachment_anchor -->', details_list)
+
+            table = self.m_HTMLTableResponse
+            table = table.replace('<!-- table_content_anchor -->', table_header)
+            file_content = file_content.replace('<!-- profile_result_table -->', table)
+        else:
+            try:
+                file_content = open('./html/index.html').read()
+                return_value = True
+            except OSError:
+                return_value = False
+                logging.error("Unable to open index page")
+        return return_value, file_content
+
     def GetParameterSet(self, param_set: dict):
         """extract parameter set and store it
 
@@ -669,34 +716,7 @@ class ProfileHandler(GenericFormHandler):
         file_content = []
         return_value = False
         if self.m_ProfileInfo['validate']:
-            try:
-                file_content = open('./html/profile.html').read()
-                return_value = True
-            except OSError:
-                return_value = False
-                logging.error("Unable to open profile page")
-
-            if return_value:
-                details_list = str()
-                table_row = self.m_HTMLTableRowDescriptor
-                table_row = table_row.replace('USERNAME', self.m_ProfileInfo['username'])
-                table_row = table_row.replace('PASSWORD', self.m_ProfileInfo['password'])
-                table_row = table_row.replace('EMAIL', self.m_ProfileInfo['email'])
-                details_list = table_row
-
-                table_header = self.m_HTMLHeaderLine
-                table_header = table_header.replace('<!-- header_attachment_anchor -->', details_list)
-
-                table = self.m_HTMLTableResponse
-                table = table.replace('<!-- table_content_anchor -->', table_header)
-                file_content = file_content.replace('<!-- profile_result_table -->', table)
-            else:
-                try:
-                    file_content = open('./html/index.html').read()
-                    return_value = True
-                except OSError:
-                    return_value = False
-                    logging.error("Unable to open index page")
+            return_value, file_content = self.Update()
 
         return return_value, file_content
 
