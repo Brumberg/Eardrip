@@ -128,7 +128,7 @@ class Eddi:
         :rtype: -
 
         """
-        self.m_Database.close()
+        self.m_DataBase.close()
 
     def GetUserAccessInterface(self) -> IUserProfile:
         """returns interface to access user data
@@ -201,9 +201,10 @@ class Eddi:
             return_value = False
             try:
                 cursor = self.m_Parent.m_DataBase.cursor()
-                qmarks = ', '.join('?' * len(dict))
-                qry = "INSERT INTO trackdata (%s) Values (%s)" % (qmarks, qmarks)
-                cursor.execute(qry, dict.keys() + dict.values())
+                key_string = ','.join(param_set.keys())
+                val_string = ','.join(param_set.values())
+                qry = "INSERT INTO trackdata (%s) Values (%s)" % (key_string, val_string)
+                cursor.execute(qry, param_set.keys() + param_set.values())
                 self.m_Parent.m_DataBase.commit()
                 cursor.close()
                 return_value = True
@@ -283,8 +284,7 @@ class Eddi:
             return_value = True
             try:
                 cursor = self.m_Parent.m_DataBase.cursor()
-                cursor.execute("INSERT INTO user (username, password, email) VALUES (%s, %s, %s)",
-                               (dict['username'], dict['password'], dict['email']))
+                cursor.execute("INSERT INTO user (username, password, email) VALUES (%s, %s, %s)", (dict['username'], dict['password'], dict['email']))
                 self.m_Parent.m_DataBase.commit()
             except:
                 return_value = False

@@ -321,7 +321,9 @@ class TrackSelectionHandler(GenericFormHandler):
             if match:
                 a = a[0:match.start()]
 
-            dict[a] = value.decode("utf-8")
+            #dict[a] = value.decode("utf-8")
+            temp = value.decode("utf-8")
+            dict[a] = temp
         return dict
 
     def CreateResponse(self) -> Tuple[bool, str]:
@@ -336,6 +338,7 @@ class TrackSelectionHandler(GenericFormHandler):
 
         if self.m_ParameterSet:
             dataset = self.ConvertDictionary()
+            dataset.pop('FormIdentifier', None)
             if (self.m_TrackAttributesAccessInterface.write(dataset)):
                 try:
                     file_content = open('./html/homepage.html').read()
@@ -395,10 +398,9 @@ class LoginHandler(GenericFormHandler):
         try:
             login_username = self.m_ParameterSet[b'login_usernameid'].decode('utf-8')
             login_password = self.m_ParameterSet[b'login_passwordid'].decode('utf-8')
-            profile_data = {'validity': False, 'username': login_username, 'password': login_password,
-                            'email': 'unknown'}
+            profile_data = {'validity': False, 'username': login_username, 'password': login_password,'email': 'unknown'}
 
-            page_to_open = './html/index.html'
+            page_to_open = './html/homepage.html'
             # searches database for the username
             success = self.m_UserAccessInterface.check(profile_data)
             if success:
