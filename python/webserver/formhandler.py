@@ -581,10 +581,11 @@ class SignupHandler(GenericFormHandler):
                     return_value = self.m_UserAccessInterface.write(profile_data)
                     if return_value:
                         profile_dictionary['validity'] = True
-                        try:
-                            file_content = open('./html/profile.html').read()
-                            UpdateProfile(file_content)
-                        except OSError:
+                        username = profile_data['username']
+                        password = profile_data['password']
+                        email = profile_data['email']
+                        return_value, file_content = ProfileHandler.Update(username, password, email)
+                        if not return_value:
                             logging.error("Unable to open file")
                             return_value = False
                             file_content = []
@@ -663,7 +664,20 @@ class ProfileHandler(GenericFormHandler):
         """
         super().__del__()
 
-    def Update(self) -> Tuple[bool, str]:
+    @staticmethod
+    def Update(username, password, email) -> Tuple[bool, str]:
+        """Update, fills out profile form
+
+        :param username: username
+        :type: string
+        :param password: password
+        :type: string
+        :param email: email
+        :type: string
+        :return: return_value, html content
+        :rtype: boolean, string
+
+        """
         try:
             file_content = open('./html/profile.html').read()
             return_value = True
@@ -674,16 +688,16 @@ class ProfileHandler(GenericFormHandler):
 
         if return_value:
             details_list = str()
-            table_row = self.m_HTMLTableRowDescriptor
-            table_row = table_row.replace('USERNAME', self.m_ProfileInfo['username'])
-            table_row = table_row.replace('PASSWORD', self.m_ProfileInfo['password'])
-            table_row = table_row.replace('EMAIL', self.m_ProfileInfo['email'])
+            table_row = ProfileHandler.m_HTMLTableRowDescriptor
+            table_row = table_row.replace('USERNAME', username)
+            table_row = table_row.replace('PASSWORD', password)
+            table_row = table_row.replace('EMAIL', email)
             details_list = table_row
 
-            table_header = self.m_HTMLHeaderLine
+            table_header = ProfileHandler.m_HTMLHeaderLine
             table_header = table_header.replace('<!-- header_attachment_anchor -->', details_list)
 
-            table = self.m_HTMLTableResponse
+            table = ProfileHandler.m_HTMLTableResponse
             table = table.replace('<!-- table_content_anchor -->', table_header)
             file_content = file_content.replace('<!-- profile_result_table -->', table)
         else:
@@ -716,7 +730,10 @@ class ProfileHandler(GenericFormHandler):
         file_content = []
         return_value = False
         if self.m_ProfileInfo['validate']:
-            return_value, file_content = self.Update()
+            username = self.m_ProfileInfo['username']
+            password = self.m_ProfileInfo['password']
+            email = self.m_ProfileInfo['email']
+            return_value, file_content = ProfileHandler.Update(username, password,email)
 
         return return_value, file_content
 

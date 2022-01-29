@@ -102,6 +102,27 @@ The ``rema`` module
 
 |
 
+The ``eddi`` module
+*******************
+.. autoclass:: python.eddi.IUserProfile
+    :members:
+    :undoc-members:
+    :show-inheritance:
+	
+.. autoclass:: python.eddi.ITrackAttributes
+    :members:
+    :undoc-members:
+    :show-inheritance:
+	
+.. autoclass:: python.eddi.Eddi
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+|
+
+|
+
 The ``tools`` module
 ********************
 .. autofunction:: python.tools.mulo.CreatePlayList
