@@ -449,13 +449,16 @@ class LoginHandler(GenericFormHandler):
                 # searches database for the username
                 success = self.m_UserAccessInterface.read(profile_data)
                 if success:
+                    set_error_status = None
                     if profile_data['username'] is None:
-                        logging.debug("unknown user")
-                        return_value = False
+                        logging.debug('Username not filled in.')
+                        set_error_status = 'Username not filled in.'
+                        return_value = True
                         page_to_open = './html/index.html'
                     elif profile_data['password'] is None:
-                        logging.debug("no password")
-                        return_value = False
+                        logging.debug('Password not filled in')
+                        set_error_status = 'Password not filled in.'
+                        return_value = True
                         page_to_open = './html/index.html'
                     elif profile_data['username'] == login_username and profile_data['password'] == login_password:
                         logging.debug("log in successfull")
@@ -463,19 +466,25 @@ class LoginHandler(GenericFormHandler):
                         profile_data['validity'] = True
                         page_to_open = './html/homepage.html'
                     elif profile_data['username'] != login_username:
-                        return_value = False
-                        logging.debug("unknown user")
+                        return_value = True
+                        logging.debug('User does not exist. Please register.')
+                        set_error_status = 'User does not exist. Please register.'
                         page_to_open = './html/index.html'
                     else:
-                        return_value = False
-                        logging.debug("invalid password")
+                        return_value = True
+                        logging.debug("Invalid password")
+                        set_error_status = 'Invalid password. Try again.'
                         page_to_open = './html/index.html'
                 else:
+                    logging.debug("Unable to access data base")
                     page_to_open = './html/index.html'
                     return_value = False
 
                 file_content = open(page_to_open).read()
+                if set_error_status is not None:
+                    file_content = file_content.replace('<!-- LOGIN_STATUS -->', '<b>' + set_error_status + '</b>')
             except OSError:
+                return_value = False
                 logging.error("Unable to open file")
         else:
             try:

@@ -13,6 +13,7 @@ class MyServer(BaseHTTPRequestHandler):
     m_CallbackHandler = {}
     m_UserProfileInterface = None
     m_TrackProfileInterface = None
+    m_ProfileInfo = None
 
     def __init__(self, *arguments):
         """Constructor, resets the formula handler dictionary
@@ -27,13 +28,13 @@ class MyServer(BaseHTTPRequestHandler):
 
         user_interface = dbaccess.GetUserAccessInterface()
         track_profile_interface = dbaccess.GetTrackAttributesAccessInterface()
-        profile_info = {'validity': False,  'username': 'empty', 'password': 'empty', 'email': 'empty'}
+        self.m_ProfileInfo = {'validity': False,  'username': 'empty', 'password': 'empty', 'email': 'empty'}
 
         for i in self.m_CallbackHandler:
             self.m_CallbackHandler[i].RegisterSpy(spy)
             self.m_CallbackHandler[i].RegisterUserAccessInterface(user_interface)
             self.m_CallbackHandler[i].RegisterTrackAttributesAccessInterface(track_profile_interface)
-            self.m_CallbackHandler[i].RegisterProfile(profile_info)
+            self.m_CallbackHandler[i].RegisterProfile(self.m_ProfileInfo)
 
         BaseHTTPRequestHandler.__init__(self, *arguments)
 
@@ -71,14 +72,23 @@ class MyServer(BaseHTTPRequestHandler):
                 self.end_headers()
 
         else:
+            set_access_denied_message = False
             if self.path == '/':
                 self.path = './html/index.html'
+            elif not self.m_ProfileInfo['validity']:
+                self.path = './html/index.html'
+                set_access_denied_message = True
             else:
                 self.path = './html' + self.path
 
             try:
                 file_to_open = open(self.path[0:]).read()
-                logging.info('loading html file {}'.format(self.path[0:]))
+                if set_access_denied_message:
+                    file_to_open = file_to_open.replace('<!-- LOGIN_STATUS -->', '<b>Acces denied. You are not signed '
+                                                                                'in.</b>')
+                    logging.info('loading html file {}. Access denied.'.format(self.path[0:]))
+                else:
+                    logging.info('loading html file {}'.format(self.path[0:]))
                 self.send_response(200)
             except:
                 file_to_open = "File Not Found"
