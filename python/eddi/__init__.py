@@ -203,7 +203,10 @@ class Eddi:
                 cursor = self.m_Parent.m_DataBase.cursor()
                 key_string = ','.join(param_set.keys())
                 val_string = ','.join(param_set.values())
-                qry = "INSERT INTO trackdata (%s) Values (%s)" % (key_string, val_string)
+
+                #qry = "INSERT INTO trackdata (%s) Values (%s)" % (key_string, val_string)
+                qry = "INSERT INTO trackdata (field_track_id, field_artist_id, field_title_id, field_genre_id, field_popularity, field_danceability, field_energy, field_key, field_loudness, field_mode, field_speechiness, field_acousticness, field_instrumentalness, field_liveness, field_valence, field_tempo, field_type, field_id, field_uri, field_track_href, field_analysis_url, field_duration_ms, field_time_signature) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (TRACK, ARTIST, TITLE, GENRE, POPULARITY, DANCEABILITY, ENERGY, KEY, LOUDNESS, MODE, SPEECHINESS, ACOUSTICNESS, INSTRUMENTALNESS, LIVENESS, VALENCE, TEMPO, TYPE, ID, URI, HREF, URL, MS, TIMESIGNATURE)
+
                 cursor.execute(qry, param_set.keys() + param_set.values())
                 self.m_Parent.m_DataBase.commit()
                 cursor.close()
