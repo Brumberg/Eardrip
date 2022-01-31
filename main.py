@@ -3,14 +3,14 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from python.rema import remotedatabase as rema
 from python.eddi import Eddi
 from http.cookies import SimpleCookie
+import uuid
 import logging
-import threading
 import urllib.parse
 import python.webserver
 import python.webserver.formhandler
 from python.webserver.sessionmanager import SessionManager
 
-class MyServer(BaseHTTPRequestHandler):
+class EarDripServer(BaseHTTPRequestHandler):
     m_SessionHandler = {}
     m_FormHandler = {}
     m_CallbackHandler = {}
@@ -26,7 +26,7 @@ class MyServer(BaseHTTPRequestHandler):
 
         """
         spy = StartupRema()
-        self.m_CallbackHandler = MyServer.m_FormHandler.copy()
+        self.m_CallbackHandler = EarDripServer.m_FormHandler.copy()
         dbaccess = Eddi()
 
         user_interface = dbaccess.GetUserAccessInterface()
@@ -54,15 +54,15 @@ class MyServer(BaseHTTPRequestHandler):
         cookies = SimpleCookie(self.headers.get('Cookie'))
         if cookies and 'session_id' in cookies:
             session_id = SessionManager.OpenSession(cookies['session_id'].value, self.m_ProfileInfo)
-            print("Session Id: {} User: {}".format(session_id, self.m_ProfileInfo['username']))
+            logging.info("Session Id: {} User: {}".format(session_id, self.m_ProfileInfo['username']))
         else:
             session_id = SessionManager.OpenSession(None, self.m_ProfileInfo)
-            print("Session Id: {} User: {}".format(session_id, self.m_ProfileInfo['username']))
+            logging.info("Session Id: {} User: {}".format(session_id, self.m_ProfileInfo['username']))
             cookies['session_id'] = session_id
             for morsel in cookies.values():
                 self.send_header("Set-Cookie", morsel.OutputString())
 
-    def GetSessionIdentifier(self) -> int:
+    def GetSessionIdentifier(self) -> uuid:
         session_identifier = None
         cookies = SimpleCookie(self.headers.get('Cookie'))
         if cookies and 'session_id' in cookies:
@@ -188,8 +188,8 @@ class MyServer(BaseHTTPRequestHandler):
         :type: derived from GenericFormHandler
 
         """
-        if not formidentifier in MyServer.m_FormHandler:
-            MyServer.m_FormHandler[formidentifier] = formhandler
+        if not formidentifier in EarDripServer.m_FormHandler:
+            EarDripServer.m_FormHandler[formidentifier] = formhandler
             logging.info('Parameter {} registered'.format(formidentifier))
         else:
             logging.error('Error: Parameter {} already registered'.format(formidentifier))
@@ -204,15 +204,17 @@ def StartupServer():
         :rtype: -
         """
     logging.info('Starting up server')
+    print('Starting up server...')
+    print('@' 'http://localhost:8080')
     #server = python.webserver.HTTPWebServer()
     #server.Initialize("localhost", 8080)
-    MyServer.RegisterForm(b'homepage_form', python.webserver.formhandler.HomepageHandler())
-    MyServer.RegisterForm(b'trackselection_form', python.webserver.formhandler.TrackSelectionHandler())
-    MyServer.RegisterForm(b'login_form', python.webserver.formhandler.LoginHandler())
-    MyServer.RegisterForm(b'signup_form', python.webserver.formhandler.SignupHandler())
-    MyServer.RegisterForm(b'profile_form', python.webserver.formhandler.ProfileHandler())
+    EarDripServer.RegisterForm(b'homepage_form', python.webserver.formhandler.HomepageHandler())
+    EarDripServer.RegisterForm(b'trackselection_form', python.webserver.formhandler.TrackSelectionHandler())
+    EarDripServer.RegisterForm(b'login_form', python.webserver.formhandler.LoginHandler())
+    EarDripServer.RegisterForm(b'signup_form', python.webserver.formhandler.SignupHandler())
+    EarDripServer.RegisterForm(b'profile_form', python.webserver.formhandler.ProfileHandler())
     SessionManager.StartScheduer()
-    server = ThreadedHTTPServer(('localhost', 8080), MyServer)
+    server = ThreadedHTTPServer(('localhost', 8080), EarDripServer)
     server.serve_forever()
     #server.Start(MyServer)
     SessionManager.StopScheduer()

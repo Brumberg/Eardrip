@@ -25,6 +25,16 @@ Documentation
 
 |
 
+The ``SessionManager`` class
+******************************
+.. autoclass:: python.webserver.sessionmanager.SessionManager
+    :members:
+    :undoc-members:
+
+|
+
+|
+
 The ``GenericWebServer`` class
 ******************************
 .. autoclass:: python.webserver.GenericWebServer
@@ -131,7 +141,7 @@ The ``tools`` module
 
 The ``main`` module
 *******************
-.. autoclass:: main.MyServer
+.. autoclass:: main.EarDripServer
     :members:
     :undoc-members:
     :show-inheritance:
