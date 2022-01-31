@@ -1,8 +1,10 @@
-from http.server import BaseHTTPRequestHandler
+from socketserver import ThreadingMixIn
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from python.rema import remotedatabase as rema
 from python.eddi import Eddi
 from http.cookies import SimpleCookie
 import logging
+import threading
 import urllib.parse
 import python.webserver
 import python.webserver.formhandler
@@ -192,6 +194,8 @@ class MyServer(BaseHTTPRequestHandler):
         else:
             logging.error('Error: Parameter {} already registered'.format(formidentifier))
 
+class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
+    """Handle requests in a separate thread."""
 
 def StartupServer():
     """Starts the web server
@@ -200,15 +204,17 @@ def StartupServer():
         :rtype: -
         """
     logging.info('Starting up server')
-    server = python.webserver.HTTPWebServer()
-    server.Initialize("localhost", 8080)
+    #server = python.webserver.HTTPWebServer()
+    #server.Initialize("localhost", 8080)
     MyServer.RegisterForm(b'homepage_form', python.webserver.formhandler.HomepageHandler())
     MyServer.RegisterForm(b'trackselection_form', python.webserver.formhandler.TrackSelectionHandler())
     MyServer.RegisterForm(b'login_form', python.webserver.formhandler.LoginHandler())
     MyServer.RegisterForm(b'signup_form', python.webserver.formhandler.SignupHandler())
     MyServer.RegisterForm(b'profile_form', python.webserver.formhandler.ProfileHandler())
     SessionManager.StartScheduer()
-    server.Start(MyServer)
+    server = ThreadedHTTPServer(('localhost', 8080), MyServer)
+    server.serve_forever()
+    #server.Start(MyServer)
     SessionManager.StopScheduer()
 
 
