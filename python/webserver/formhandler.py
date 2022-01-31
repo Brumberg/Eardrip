@@ -175,47 +175,8 @@ class HomepageHandler(GenericFormHandler):
             artist_info = self.m_Spy.GetArtistInfo(artist_uri)
             track_analysis = self.m_Spy.GetTrackAnalytics(track_uri)
 
-            music_list = str()
-            for i in range(0, len(track_data)):
-                table_row = TrackSelectionHandler.m_HTMLTableRowDescriptor
-                table_row = table_row.replace('ARTIST_ID', track_data[i]['artist'])
-                table_row = table_row.replace('TITLE_ID', track_data[i]['track'])
-                table_row = table_row.replace('TRACK_ID', track_data[i]['track_id'])
-                table_row = table_row.replace('GENRE_ID', ','.join(artist_info[i]['genres']))
-                table_row = table_row.replace('POPULARITY', str(track_data[i]['popularity']))
-
-                # table_row = table_row.replace('URI', track_data[i]['uri'])
-                table_row = table_row.replace('DANCEABILITY', str(track_analysis[i]['danceability']))
-                table_row = table_row.replace('ENERGY', str(track_analysis[i]['energy']))
-                table_row = table_row.replace('KEY', str(track_analysis[i]['key']))
-                table_row = table_row.replace('LOUDNESS', str(track_analysis[i]['loudness']))
-                table_row = table_row.replace('MODE', str(track_analysis[i]['mode']))
-                table_row = table_row.replace('SPEECHINESS', str(track_analysis[i]['speechiness']))
-                table_row = table_row.replace('ACOUSTICNESS', str(track_analysis[i]['acousticness']))
-                table_row = table_row.replace('INSTRUMENTALNESS', str(track_analysis[i]['instrumentalness']))
-                table_row = table_row.replace('LIVENESS', str(track_analysis[i]['liveness']))
-                table_row = table_row.replace('VALENCE', str(track_analysis[i]['valence']))
-                table_row = table_row.replace('TEMPO', str(track_analysis[i]['tempo']))
-                table_row = table_row.replace('TYPE', str(track_analysis[i]['type']))
-                table_row = table_row.replace('ATTRIB_ID', str(track_analysis[i]['id']))
-                table_row = table_row.replace('ATTRIB_URI', str(track_analysis[i]['uri']))
-                table_row = table_row.replace('TRACK_HREF', str(track_analysis[i]['track_href']))
-                table_row = table_row.replace('ANALYSIS_URL', str(track_analysis[i]['analysis_url']))
-                table_row = table_row.replace('DURATION_MS', str(track_analysis[i]['duration_ms']))
-                table_row = table_row.replace('TIME_SIGNATURE', str(track_analysis[i]['time_signature']))
-
-                table_row = table_row.replace('NUMBER', str(i))
-                table_row = table_row.replace('ACTION', str(i))
-                music_list = music_list + table_row
-
-
-
-            table_header = TrackSelectionHandler.m_HTMLHeaderLine
-            table_header = table_header.replace('<!-- header_attachment_anchor -->', music_list)
-
-            table = TrackSelectionHandler.m_HTMLTableResponse
-            table = table.replace('<!-- table_content_anchor -->', table_header)
-            file_content = file_content.replace('<!-- homepage_result_table -->', table)
+            htmltable = TrackSelectionHandler.FillInHTMLForm(track_data, artist_info, track_analysis)
+            file_content = file_content.replace('<!-- homepage_result_table -->', htmltable)
         return retVal, file_content
 
 
@@ -303,6 +264,56 @@ class TrackSelectionHandler(GenericFormHandler):
 
         """
         super().GetParameterSet(session_id, param_set)
+
+    @classmethod
+    def FillInHTMLForm(cls, track_data: list, artist_info: list, track_analysis: list) -> str:
+        """
+
+        :param track_data: contain list of tracks
+        :param artist_info: related artist attributes
+        :param track_analysis: extended track attributes
+        :return: string containing filled in html table
+        :rtype: string
+        """
+        music_list = str()
+        for i in range(0, len(track_data)):
+            table_row = TrackSelectionHandler.m_HTMLTableRowDescriptor
+            table_row = table_row.replace('ARTIST_ID', track_data[i]['artist'])
+            table_row = table_row.replace('TITLE_ID', track_data[i]['track'])
+            table_row = table_row.replace('TRACK_ID', track_data[i]['track_id'])
+            table_row = table_row.replace('GENRE_ID', ','.join(artist_info[i]['genres']))
+            table_row = table_row.replace('POPULARITY', str(track_data[i]['popularity']))
+
+            # table_row = table_row.replace('URI', track_data[i]['uri'])
+            table_row = table_row.replace('DANCEABILITY', str(track_analysis[i]['danceability']))
+            table_row = table_row.replace('ENERGY', str(track_analysis[i]['energy']))
+            table_row = table_row.replace('KEY', str(track_analysis[i]['key']))
+            table_row = table_row.replace('LOUDNESS', str(track_analysis[i]['loudness']))
+            table_row = table_row.replace('MODE', str(track_analysis[i]['mode']))
+            table_row = table_row.replace('SPEECHINESS', str(track_analysis[i]['speechiness']))
+            table_row = table_row.replace('ACOUSTICNESS', str(track_analysis[i]['acousticness']))
+            table_row = table_row.replace('INSTRUMENTALNESS', str(track_analysis[i]['instrumentalness']))
+            table_row = table_row.replace('LIVENESS', str(track_analysis[i]['liveness']))
+            table_row = table_row.replace('VALENCE', str(track_analysis[i]['valence']))
+            table_row = table_row.replace('TEMPO', str(track_analysis[i]['tempo']))
+            table_row = table_row.replace('TYPE', str(track_analysis[i]['type']))
+            table_row = table_row.replace('ATTRIB_ID', str(track_analysis[i]['id']))
+            table_row = table_row.replace('ATTRIB_URI', str(track_analysis[i]['uri']))
+            table_row = table_row.replace('TRACK_HREF', str(track_analysis[i]['track_href']))
+            table_row = table_row.replace('ANALYSIS_URL', str(track_analysis[i]['analysis_url']))
+            table_row = table_row.replace('DURATION_MS', str(track_analysis[i]['duration_ms']))
+            table_row = table_row.replace('TIME_SIGNATURE', str(track_analysis[i]['time_signature']))
+
+            table_row = table_row.replace('NUMBER', str(i))
+            table_row = table_row.replace('ACTION', str(i))
+            music_list = music_list + table_row
+
+        table_header = TrackSelectionHandler.m_HTMLHeaderLine
+        table_header = table_header.replace('<!-- header_attachment_anchor -->', music_list)
+
+        table = TrackSelectionHandler.m_HTMLTableResponse
+        table = table.replace('<!-- table_content_anchor -->', table_header)
+        return table
 
     def ConvertDictionary(self):
         """returns a dictionary containing the database elements
