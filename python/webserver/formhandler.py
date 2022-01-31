@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from typing import Tuple
-import python.rema
+from python.webserver.sessionmanager import SessionManager
 import logging
 import logging.handlers
 import re
@@ -20,7 +20,7 @@ class GenericFormHandler:
     m_ProfileInfo = None
     m_UserAccessInterface = None
     m_TrackAttributesAccessInterface = None
-
+    m_SessionId = None
     """spotify handler
 
     """
@@ -89,9 +89,10 @@ class GenericFormHandler:
         self.m_TrackAttributesAccessInterface = interface
 
     @abstractmethod
-    def GetParameterSet(self, param_set: dict):
+    def GetParameterSet(self, session_id: int, param_set: dict):
         """extract parameter set and store it
 
+        :param session_id:
         :param param_set: dictionary containing all parameters
         :type: dict
         :return: -
@@ -99,6 +100,8 @@ class GenericFormHandler:
 
         """
         self.m_ParameterSet = param_set.copy()
+        self.m_SessionId = session_id
+        self.m_ProfileInfo = SessionManager.GetSessionContext(session_id)
 
     @abstractmethod
     def CreateResponse(self) -> Tuple[bool, str]:
@@ -183,16 +186,18 @@ class HomepageHandler(GenericFormHandler):
         """
         super().__del__()
 
-    def GetParameterSet(self, param_set: dict):
+    def GetParameterSet(self, session_id: int, param_set: dict):
         """extract parameter set and store it
 
+        :param param_set:
+        :param session_id:
         :param paramset: dictionary containing all parameters
         :type: dict
         :return: -
         :rtype: -
 
         """
-        super().GetParameterSet(param_set)
+        super().GetParameterSet(session_id, param_set)
 
     def CreateResponse(self) -> Tuple[bool, str]:
         """create html response
@@ -339,16 +344,18 @@ class TrackSelectionHandler(GenericFormHandler):
         """
         super().__del__()
 
-    def GetParameterSet(self, param_set: dict):
+    def GetParameterSet(self, session_id: int, param_set: dict):
         """extract parameter set and store it
 
+        :param session_id:
+        :param param_set:
         :param paramset: dictionary containing all parameters
         :type: dict
         :return: -
         :rtype: -
 
         """
-        super().GetParameterSet(param_set)
+        super().GetParameterSet(session_id, param_set)
 
     def ConvertDictionary(self):
         """returns a dictionary containing the database elements
@@ -417,17 +424,18 @@ class LoginHandler(GenericFormHandler):
         """
         super().__del__()
 
-    def GetParameterSet(self, param_set: dict):
+    def GetParameterSet(self, session_id: int, param_set: dict):
         """extract parameter set and store it
 
+        :param session_id:
         :param param_set:
-        :param paramset: dictionarycontaining all parameters
+        :param paramset: dictionary containing all parameters
         :type: dict
         :return: -
         :rtype: -
 
         """
-        super().GetParameterSet(param_set)
+        super().GetParameterSet(session_id, param_set)
 
     def CreateResponse(self) -> Tuple[bool, str]:
         """create html response
@@ -464,6 +472,7 @@ class LoginHandler(GenericFormHandler):
                         logging.debug("log in successfull")
                         return_value = True
                         profile_data['validity'] = True
+                        self.m_ProfileInfo.update(profile_data)
                         page_to_open = './html/homepage.html'
                     elif profile_data['username'] != login_username:
                         return_value = True
@@ -495,6 +504,7 @@ class LoginHandler(GenericFormHandler):
                 logging.error("Unable to open file")
                 file_content = []
 
+        SessionManager.UpdateSession(self.m_SessionId, self.m_ProfileInfo)
         return return_value, file_content
 
 
@@ -519,16 +529,18 @@ class SignupHandler(GenericFormHandler):
         # print('Destructor of signup handler called')
         super().__del__()
 
-    def GetParameterSet(self, param_set: dict):
+    def GetParameterSet(self, session_id: int, param_set: dict):
         """extract parameter set and store it
 
-        :param paramset: dictionarycontaining all parameters
+        :param session_id:
+        :param param_set:
+        :param paramset: dictionary containing all parameters
         :type: dict
         :return: -
         :rtype: -
 
         """
-        super().GetParameterSet(param_set)
+        super().GetParameterSet(session_id, param_set)
 
     def CreateResponse(self) -> Tuple[bool, str]:
         """create html response
@@ -621,6 +633,7 @@ class SignupHandler(GenericFormHandler):
                     return_value = False
                     file_content = []
 
+        SessionManager.UpdateSession(self.m_SessionId, self.m_ProfileInfo)
         return return_value, file_content
 
 
@@ -709,16 +722,18 @@ class ProfileHandler(GenericFormHandler):
                 logging.error("Unable to open index page")
         return return_value, file_content
 
-    def GetParameterSet(self, param_set: dict):
+    def GetParameterSet(self, session_id: int, param_set: dict):
         """extract parameter set and store it
 
-        :param paramset: dictionarycontaining all parameters
+        :param session_id:
+        :param param_set:
+        :param paramset: dictionary containing all parameters
         :type: dict
         :return: -
         :rtype: -
 
         """
-        super().GetParameterSet(param_set)
+        super().GetParameterSet(session_id, param_set)
 
     def CreateResponse(self) -> Tuple[bool, str]:
         """create html response
@@ -729,7 +744,7 @@ class ProfileHandler(GenericFormHandler):
         """
         file_content = []
         return_value = False
-        if self.m_ProfileInfo['validate']:
+        if self.m_ProfileInfo['validity']:
             username = self.m_ProfileInfo['username']
             password = self.m_ProfileInfo['password']
             email = self.m_ProfileInfo['email']
@@ -757,16 +772,18 @@ class LogoutHandler(GenericFormHandler):
         """
         super().__del__()
 
-    def GetParameterSet(self, param_set: dict):
+    def GetParameterSet(self, session_id: int, param_set: dict):
         """extract parameter set and store it
 
-        :param paramset: dictionarycontaining all parameters
+        :param session_id:
+        :param param_set:
+        :param paramset: dictionary containing all parameters
         :type: dict
         :return: -
         :rtype: -
 
         """
-        super().GetParameterSet(param_set)
+        super().GetParameterSet(session_id, param_set)
 
     def CreateResponse(self) -> Tuple[bool, str]:
         """create html response
@@ -801,16 +818,18 @@ class SongHandler(GenericFormHandler):
         # print('Destructor of logout handler called')
         super().__del__()
 
-    def GetParameterSet(self, param_set: dict):
+    def GetParameterSet(self, session_id: int, param_set: dict):
         """extract parameter set and store it
 
-        :param paramset: dictionarycontaining all parameters
+        :param session_id:
+        :param param_set:
+        :param paramset: dictionary containing all parameters
         :type: dict
         :return: -
         :rtype: -
 
         """
-        super().GetParameterSet(param_set)
+        super().GetParameterSet(session_id, param_set)
 
     def CreateResponse(self) -> Tuple[bool, str]:
         """create html response

@@ -1,14 +1,15 @@
 from http.server import BaseHTTPRequestHandler
 from python.rema import remotedatabase as rema
 from python.eddi import Eddi
+from http.cookies import SimpleCookie
 import logging
 import urllib.parse
 import python.webserver
 import python.webserver.formhandler
-import python.tools.mulo as mulo
-
+from python.webserver.sessionmanager import SessionManager
 
 class MyServer(BaseHTTPRequestHandler):
+    m_SessionHandler = {}
     m_FormHandler = {}
     m_CallbackHandler = {}
     m_UserProfileInterface = None
@@ -28,7 +29,7 @@ class MyServer(BaseHTTPRequestHandler):
 
         user_interface = dbaccess.GetUserAccessInterface()
         track_profile_interface = dbaccess.GetTrackAttributesAccessInterface()
-        self.m_ProfileInfo = {'validity': False,  'username': 'empty', 'password': 'empty', 'email': 'empty'}
+        self.m_ProfileInfo = {'validity': False, 'username': 'empty', 'password': 'empty', 'email': 'empty'}
 
         for i in self.m_CallbackHandler:
             self.m_CallbackHandler[i].RegisterSpy(spy)
@@ -46,6 +47,25 @@ class MyServer(BaseHTTPRequestHandler):
 
         """
         m_CallbackHandler = {}
+
+    def HandleSessionIdentifier(self):
+        cookies = SimpleCookie(self.headers.get('Cookie'))
+        if cookies and 'session_id' in cookies:
+            session_id = SessionManager.OpenSession(cookies['session_id'].value, self.m_ProfileInfo)
+            print("Session Id: {} User: {}".format(session_id, self.m_ProfileInfo['username']))
+        else:
+            session_id = SessionManager.OpenSession(None, self.m_ProfileInfo)
+            print("Session Id: {} User: {}".format(session_id, self.m_ProfileInfo['username']))
+            cookies['session_id'] = session_id
+            for morsel in cookies.values():
+                self.send_header("Set-Cookie", morsel.OutputString())
+
+    def GetSessionIdentifier(self) -> int:
+        session_identifier = None
+        cookies = SimpleCookie(self.headers.get('Cookie'))
+        if cookies and 'session_id' in cookies:
+            session_identifier = cookies['session_id'].value
+        return session_identifier
 
     def do_GET(self):
         """Displays the content of the (templated) web site
@@ -73,6 +93,12 @@ class MyServer(BaseHTTPRequestHandler):
 
         else:
             set_access_denied_message = False
+            identifier = self.GetSessionIdentifier()
+            if identifier is not None:
+                info = SessionManager.GetSessionContext(identifier)
+                if info is not None:
+                    self.m_ProfileInfo = info
+
             if self.path == '/':
                 self.path = './html/index.html'
             elif self.path == '/index.html':
@@ -87,11 +113,14 @@ class MyServer(BaseHTTPRequestHandler):
                 file_to_open = open(self.path[0:]).read()
                 if set_access_denied_message:
                     file_to_open = file_to_open.replace('<!-- LOGIN_STATUS -->', '<b>Acces denied. You are not signed '
-                                                                                'in.</b>')
+                                                                                 'in.</b>')
                     logging.info('loading html file {}. Access denied.'.format(self.path[0:]))
                 else:
                     logging.info('loading html file {}'.format(self.path[0:]))
+
                 self.send_response(200)
+                self.HandleSessionIdentifier()
+
             except:
                 file_to_open = "File Not Found"
                 logging.error('loading html file {} failed'.format(self.path[0:]))
@@ -110,13 +139,14 @@ class MyServer(BaseHTTPRequestHandler):
         content_length = int(self.headers['Content-Length'])  # <--- Gets the size of data
         self.data_string = self.rfile.read(int(self.headers['Content-Length']))
         self.keyvalue = dict(urllib.parse.parse_qsl(self.data_string))
+        session_id = self.GetSessionIdentifier()
         try:
             if b'FormIdentifier' in self.keyvalue:
                 logging.info('Key FormIdentifier exists with value {}'.format(self.keyvalue[b'FormIdentifier']))
                 if self.keyvalue[b'FormIdentifier'] in self.m_CallbackHandler:
                     logging.info('Executing callback')
                     callbacksel = self.keyvalue[b'FormIdentifier']
-                    self.m_CallbackHandler[callbacksel].GetParameterSet(self.keyvalue)
+                    self.m_CallbackHandler[callbacksel].GetParameterSet(session_id, self.keyvalue)
                     status, file_to_open = self.m_CallbackHandler[callbacksel].CreateResponse()
                     if status == False:
                         file_to_open = "Unregistered web page"
