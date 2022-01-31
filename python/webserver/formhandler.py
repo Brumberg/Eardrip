@@ -115,59 +115,6 @@ class GenericFormHandler:
 
 
 class HomepageHandler(GenericFormHandler):
-    m_HTMLHeaderLine = (
-        '<tr>'
-        '<td>artist</td>'
-        '<td>title</td>'
-        '<td>track id</td>'
-        '<td>genre</td>'
-        '<td>popularity</td>'
-        '<td>action</td>'
-        '</tr>'
-        '<!-- header_attachment_anchor -->'
-    )
-    m_HTMLTableRowDescriptor = (
-        '<tr>'
-        '<td>ARTIST_ID</td>'
-        '<td>TITLE_ID</td>'
-        '<td>TRACK_ID</td>'
-        '<td>GENRE_ID</td>'
-        '<td>POPULARITY</td>'
-        '<td><form name="TABLE_FORM_ACTION" action="" method="post">'
-        '<button>Track_ACTION</button>'
-        '<input type="hidden" id="FormIdentifier" name="FormIdentifier" value="trackselection_form">'
-        '<input type="hidden" value="TRACK_ID" name="field_track_id_NUMBER" id="field_track_id_NUMBER">'
-        '<input type="hidden" value="ARTIST_ID_NUMBER" name="field_artist_id_NUMBER" id="field_artist_id_NUMBER">'
-        '<input type="hidden"value="TITLE_ID" name="field_title_id_NUMBER" id="field_title_id_NUMBER">'
-        '<input type="hidden"value="GENRE_ID" name="field_genre_id_NUMBER" id="field_genre_id_NUMBER">'
-        '<input type="hidden"value="POPULARITY" name="field_popularity_NUMBER" id="field_popularity_NUMBER">'
-        '<input type="hidden"value="DANCEABILITY" name="field_danceability_NUMBER" id="field_danceability_NUMBER">'
-        '<input type="hidden"value="ENERGY" name="field_energy_NUMBER" id="field_energy_NUMBER">'
-        '<input type="hidden"value="KEY" name="field_key_NUMBER" id="field_key_NUMBER">'
-        '<input type="hidden"value="LOUDNESS" name="field_loudness_NUMBER" id="field_loudness_NUMBER">'
-        '<input type="hidden"value="MODE" name="field_mode_NUMBER" id="field_mode_NUMBER">'
-        '<input type="hidden"value="SPEECHINESS" name="field_speechiness_NUMBER" id="field_speechiness_NUMBER">'
-        '<input type="hidden"value="ACOUSTICNESS" name="field_acousticness_NUMBER" id="field_acousticness_NUMBER">'
-        '<input type="hidden"value="INSTRUMENTALNESS" name="field_instrumentalness_NUMBER" id="field_instrumentalness_NUMBER">'
-        '<input type="hidden"value="LIVENESS" name="field_liveness_NUMBER" id="field_liveness_NUMBER">'
-        '<input type="hidden"value="VALENCE" name="field_valence_NUMBER" id="field_valence_NUMBER">'
-        '<input type="hidden"value="TEMPO" name="field_tempo_NUMBER" id="field_tempo_NUMBER">'
-        '<input type="hidden"value="TYPE" name="field_type_NUMBER" id="field_type_NUMBER">'
-        '<input type="hidden"value="ATTRIB_ID" name="field_id_NUMBER" id="field_id_NUMBER">'
-        '<input type="hidden"value="ATTRIB_URI" name="field_uri_NUMBER" id="field_uri_NUMBER">'
-        '<input type="hidden"value="TRACK_HREF" name="field_track_href_NUMBER" id="field_trackhref_NUMBER">'
-        '<input type="hidden"value="ANALYSIS_URL" name="field_analysis_url_NUMBER" id="field_analysisurl_NUMBER">'
-        '<input type="hidden"value="DURATION_MS" name="field_duration_ms_NUMBER" id="field_durationms_NUMBER">'
-        '<input type="hidden"value="TIME_SIGNATURE" name="field_time_signature_NUMBER" id="field_time_signature_NUMBER">'  
-        'ACTION</form></td>'
-        '</tr>'
-    )
-    m_HTMLTableResponse = (
-        '<table style="width:100%">'
-        '<!-- table_content_anchor -->'
-        '</table>'
-    )
-
     def __init__(self):
         """Constructor, resets the form handler dictionary
 
@@ -230,7 +177,7 @@ class HomepageHandler(GenericFormHandler):
 
             music_list = str()
             for i in range(0, len(track_data)):
-                table_row = self.m_HTMLTableRowDescriptor
+                table_row = TrackSelectionHandler.m_HTMLTableRowDescriptor
                 table_row = table_row.replace('ARTIST_ID', track_data[i]['artist'])
                 table_row = table_row.replace('TITLE_ID', track_data[i]['track'])
                 table_row = table_row.replace('TRACK_ID', track_data[i]['track_id'])
@@ -263,10 +210,10 @@ class HomepageHandler(GenericFormHandler):
 
 
 
-            table_header = self.m_HTMLHeaderLine
+            table_header = TrackSelectionHandler.m_HTMLHeaderLine
             table_header = table_header.replace('<!-- header_attachment_anchor -->', music_list)
 
-            table = self.m_HTMLTableResponse
+            table = TrackSelectionHandler.m_HTMLTableResponse
             table = table.replace('<!-- table_content_anchor -->', table_header)
             file_content = file_content.replace('<!-- homepage_result_table -->', table)
         return retVal, file_content
@@ -316,7 +263,7 @@ class TrackSelectionHandler(GenericFormHandler):
         '<input type="hidden"value="TRACK_HREF" name="field_track_href_NUMBER" id="field_trackhref_NUMBER">'
         '<input type="hidden"value="ANALYSIS_URL" name="field_analysis_url_NUMBER" id="field_analysisurl_NUMBER">'
         '<input type="hidden"value="DURATION_MS" name="field_duration_ms_NUMBER" id="field_durationms_NUMBER">'
-        '<input type="hidden"value="TIME_SIGNATURE" name="field_time_signature_NUMBER" id="field_time_signature_NUMBER">'
+        '<input type="hidden"value="TIME_SIGNATURE" name="field_time_signature_NUMBER" id="field_time_signature_NUMBER">'  
         'ACTION</form></td>'
         '</tr>'
     )
