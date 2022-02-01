@@ -102,7 +102,7 @@ class SessionManager:
 
         """
 
-        if session_identifier != None:
+        if session_identifier is not None:
             session_handle = None
             time_change = timedelta(hours=cls.SESSION_TIMEOUT)
             session_info = dict()
@@ -114,7 +114,7 @@ class SessionManager:
                     if session_identifier in cls.m_Session.keys():
                         session_handle = cls.m_Session[session_identifier]
 
-                if session_handle == None:
+                if session_handle is None:
                     session_info['session_context'] = session_context
                     cls.m_Session[session_identifier] = session_info
                 else:

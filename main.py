@@ -25,7 +25,7 @@ class EarDripServer(BaseHTTPRequestHandler):
         :rtype: -
 
         """
-        spy = StartupRema()
+        spy = EarDripServer.StartupRema()
         self.m_CallbackHandler = EarDripServer.m_FormHandler.copy()
         dbaccess = Eddi()
 
@@ -179,6 +179,17 @@ class EarDripServer(BaseHTTPRequestHandler):
         self.wfile.write(bytes(file_to_open, 'utf-8'))
 
     @staticmethod
+    def StartupRema():
+        """Initializes spotify connection
+
+            :return: -
+            :rtype: -
+            """
+        logging.info('Starting up rema')
+        spy = rema()
+        return spy
+
+    @staticmethod
     def RegisterForm(formidentifier, formhandler):
         """register handler for html page
 
@@ -218,17 +229,6 @@ def StartupServer():
     server.serve_forever()
     #server.Start(MyServer)
     SessionManager.StopScheduer()
-
-
-def StartupRema():
-    """Initializes spotify connection
-
-        :return: -
-        :rtype: -
-        """
-    logging.info('Starting up rema')
-    spy = rema()
-    return spy
 
 
 # Press the green button in the gutter to run the script.
