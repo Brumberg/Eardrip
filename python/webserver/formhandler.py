@@ -1,6 +1,7 @@
+import uuid
 from abc import ABCMeta, abstractmethod
 from typing import Tuple
-import python.rema
+from python.webserver.sessionmanager import SessionManager
 import logging
 import logging.handlers
 import re
@@ -20,7 +21,7 @@ class GenericFormHandler:
     m_ProfileInfo = None
     m_UserAccessInterface = None
     m_TrackAttributesAccessInterface = None
-
+    m_SessionId = None
     """spotify handler
 
     """
@@ -58,7 +59,7 @@ class GenericFormHandler:
     def RegisterSpy(self, spy):
         """Register spy (spotify) object
 
-        :param spy: object handles requests/inqueries to/from spotify
+        :param spy: object handles requests/inquiries to/from spotify
         :type: spy object
         :return: -
         :rtype: -
@@ -69,7 +70,7 @@ class GenericFormHandler:
     def RegisterUserAccessInterface(self, interface):
         """Register userinterface  object
 
-        :param spy: object handles requests/inqueries to/from spotify
+        :param interface: object handles requests/inquiries to/from spotify
         :type: spy object
         :return: -
         :rtype: -
@@ -80,7 +81,7 @@ class GenericFormHandler:
     def RegisterTrackAttributesAccessInterface(self, interface):
         """Register spy (spotify) object
 
-        :param interface:
+        :param interface: interface to track handler (must contain read/write signature)
         :type: interface object
         :return: -
         :rtype: -
@@ -89,9 +90,11 @@ class GenericFormHandler:
         self.m_TrackAttributesAccessInterface = interface
 
     @abstractmethod
-    def GetParameterSet(self, param_set: dict):
+    def GetParameterSet(self, session_id: uuid, param_set: dict):
         """extract parameter set and store it
 
+        :param session_id: unique identifier representing the session
+        :type: uuid
         :param param_set: dictionary containing all parameters
         :type: dict
         :return: -
@@ -99,6 +102,8 @@ class GenericFormHandler:
 
         """
         self.m_ParameterSet = param_set.copy()
+        self.m_SessionId = session_id
+        self.m_ProfileInfo = SessionManager.GetSessionContext(session_id)
 
     @abstractmethod
     def CreateResponse(self) -> Tuple[bool, str]:
@@ -112,6 +117,72 @@ class GenericFormHandler:
 
 
 class HomepageHandler(GenericFormHandler):
+    def __init__(self):
+        """Constructor, resets the form handler dictionary
+
+        :return: -
+        :rtype: -
+
+        """
+        super().__init__()
+
+    def __del__(self):
+        """Destructor, resets the form handler dictionary
+
+        :return: -
+        :rtype: -
+
+        """
+        super().__del__()
+
+    def GetParameterSet(self, session_id: int, param_set: dict):
+        """extract parameter set and store it
+
+        :param session_id: unique identifier for the session
+        :type: uuid
+        :param param_set: dictionary containing all parameters
+        :type: dict
+        :return: -
+        :rtype: -
+
+        """
+        super().GetParameterSet(session_id, param_set)
+
+    def CreateResponse(self) -> Tuple[bool, str]:
+        """create html response
+
+        :return: status, html content
+        :rtype: boolean, string
+
+        """
+        file_content = []
+        retVal = False
+        try:
+            file_content = open('./html/homepage.html').read()
+            retVal = True
+        except OSError:
+            logging.debug('Homepage handler executed')
+
+        if retVal:
+            track_name = self.m_ParameterSet[b'homepage_songtitle'].decode("utf-8")
+            track_data = self.m_Spy.GetAttributes(track_name)
+            track_uri = []
+            artist_info = []
+            artist_uri = []
+
+            for i in range(0, len(track_data)):
+                track_uri.append(track_data[i]['uri'])
+                artist_uri.append(track_data[i]['artist_uri'])
+
+            artist_info = self.m_Spy.GetArtistInfo(artist_uri)
+            track_analysis = self.m_Spy.GetTrackAnalytics(track_uri)
+
+            htmltable = TrackSelectionHandler.FillInHTMLForm(track_data, artist_info, track_analysis)
+            file_content = file_content.replace('<!-- homepage_result_table -->', htmltable)
+        return retVal, file_content
+
+
+class TrackSelectionHandler(GenericFormHandler):
     m_HTMLHeaderLine = (
         '<tr>'
         '<td>artist</td>'
@@ -131,8 +202,8 @@ class HomepageHandler(GenericFormHandler):
         '<td>GENRE_ID</td>'
         '<td>POPULARITY</td>'
         '<td><form name="TABLE_FORM_ACTION" action="" method="post">'
-        '<button name="tlike" value="tlike">like</button>'
         '<button>dislike</button>'
+        '<button name="tlike" value="tlike">like</button>'
         '<input type="hidden" id="FormIdentifier" name="FormIdentifier" value="trackselection_form">'
         '<input type="hidden" value="TRACK_ID" name="field_track_id_NUMBER" id="field_track_id_NUMBER">'
         '<input type="hidden" value="ARTIST_ID_NUMBER" name="field_artist_id_NUMBER" id="field_artist_id_NUMBER">'
@@ -184,182 +255,71 @@ class HomepageHandler(GenericFormHandler):
         """
         super().__del__()
 
-    def GetParameterSet(self, param_set: dict):
+    def GetParameterSet(self, session_id: int, param_set: dict):
         """extract parameter set and store it
 
-        :param paramset: dictionary containing all parameters
+        :param session_id: unique identifier representing the session
+        :type: uuid
+        :param param_set: set of parameters received from the user
         :type: dict
         :return: -
         :rtype: -
 
         """
-        super().GetParameterSet(param_set)
+        super().GetParameterSet(session_id, param_set)
 
-    def CreateResponse(self) -> Tuple[bool, str]:
-        """create html response
-
-        :return: status, html content
-        :rtype: boolean, string
-
+    @classmethod
+    def FillInHTMLForm(cls, track_data: list, artist_info: list, track_analysis: list) -> str:
         """
-        file_content = []
-        retVal = False
-        try:
-            file_content = open('./html/homepage.html').read()
-            retVal = True
-        except OSError:
-            logging.debug('Homepage handler executed')
 
-        if retVal:
-            # recomendation table
-            recomendation_list = str()
-            table_row1 = self.m_HTMLTableRowDescriptor
-            table_row1 = table_row1.replace('ARTIST', 'blabla1')
-            table_row1 = table_row1.replace('TITLE', 'blabla2')
-            table_row1 = table_row1.replace('TRACK_ID', 'blabla3')
-            table_row1 = table_row1.replace('GENRE', 'blabla4')
-            recomendation_list = recomendation_list + table_row1
-            table_header1 = self.m_HTMLHeaderLine
-            table_header1 = table_header1.replace('<!-- header_attachment_anchor -->', recomendation_list)
-
-            track_name = self.m_ParameterSet[b'homepage_songtitle'].decode("utf-8")
-            track_data = self.m_Spy.GetAttributes(track_name)
-            track_uri = []
-            artist_info = []
-            artist_uri = []
-
-            # track select table
-            for i in range(0, len(track_data)):
-                track_uri.append(track_data[i]['uri'])
-                artist_uri.append(track_data[i]['artist_uri'])
-
-            artist_info = self.m_Spy.GetArtistInfo(artist_uri)
-            track_analysis = self.m_Spy.GetTrackAnalytics(track_uri)
-
-            music_list = str()
-            for i in range(0, len(track_data)):
-                table_row = self.m_HTMLTableRowDescriptor
-                table_row = table_row.replace('ARTIST', track_data[i]['artist'])
-                table_row = table_row.replace('TITLE', track_data[i]['track'])
-                table_row = table_row.replace('TRACK_ID', track_data[i]['track_id'])
-                table_row = table_row.replace('GENRE', ','.join(artist_info[i]['genres']))
-                table_row = table_row.replace('POPULARITY', str(track_data[i]['popularity']))
-
-                # table_row = table_row.replace('URI', track_data[i]['uri'])
-                table_row = table_row.replace('DANCEABILITY', str(track_analysis[i]['danceability']))
-                table_row = table_row.replace('ENERGY', str(track_analysis[i]['energy']))
-                table_row = table_row.replace('KEY', str(track_analysis[i]['key']))
-                table_row = table_row.replace('LOUDNESS', str(track_analysis[i]['loudness']))
-                table_row = table_row.replace('MODE', str(track_analysis[i]['mode']))
-                table_row = table_row.replace('SPEECHINESS', str(track_analysis[i]['speechiness']))
-                table_row = table_row.replace('ACOUSTICNESS', str(track_analysis[i]['acousticness']))
-                table_row = table_row.replace('INSTRUMENTALNESS', str(track_analysis[i]['instrumentalness']))
-                table_row = table_row.replace('LIVENESS', str(track_analysis[i]['liveness']))
-                table_row = table_row.replace('VALENCE', str(track_analysis[i]['valence']))
-                table_row = table_row.replace('TEMPO', str(track_analysis[i]['tempo']))
-                table_row = table_row.replace('TYPE', str(track_analysis[i]['type']))
-                table_row = table_row.replace('ATTRIB_ID', str(track_analysis[i]['id']))
-                table_row = table_row.replace('ATTRIB_URI', str(track_analysis[i]['uri']))
-                table_row = table_row.replace('TRACK_HREF', str(track_analysis[i]['track_href']))
-                table_row = table_row.replace('ANALYSIS_URL', str(track_analysis[i]['analysis_url']))
-                table_row = table_row.replace('DURATION_MS', str(track_analysis[i]['duration_ms']))
-                table_row = table_row.replace('TIME_SIGNATURE', str(track_analysis[i]['time_signature']))
-
-                table_row = table_row.replace('NUMBER', str(i))
-                table_row = table_row.replace('ACTION', str(i))
-                music_list = music_list + table_row
-
-            table_header = self.m_HTMLHeaderLine
-            table_header = table_header.replace('<!-- header_attachment_anchor -->', music_list)
-
-            table = self.m_HTMLTableResponse
-            table = table.replace('<!-- table_content_anchor -->', table_header)
-            file_content = file_content.replace('<!-- homepage_result_table -->', table)
-        return retVal, file_content
-
-
-class TrackSelectionHandler(GenericFormHandler):
-    m_HTMLHeaderLine = (
-        '<tr>'
-        '<td>artist</td>'
-        '<td>title</td>'
-        '<td>track id</td>'
-        '<td>genre</td>'
-        '<td>popularity</td>'
-        '<td>action</td>'
-        '</tr>'
-        '<!-- header_attachment_anchor -->'
-    )
-    m_HTMLTableRowDescriptor = (
-        '<tr>'
-        '<td>ARTIST_ID</td>'
-        '<td>TITLE_ID</td>'
-        '<td>TRACK_ID</td>'
-        '<td>GENRE_ID</td>'
-        '<td>POPULARITY</td>'
-        '<td><form name="TABLE_FORM_ACTION" action="" method="post">'
-        '<button name="like" value="like">Track_ACTION</button>'
-        '<input type="hidden" id="FormIdentifier" name="FormIdentifier" value="trackselection_form">'
-        '<input type="hidden" value="TRACK_ID" name="field_track_id_NUMBER" id="field_track_id_NUMBER">'
-        '<input type="hidden" value="ARTIST_ID_NUMBER" name="field_artist_id_NUMBER" id="field_artist_id_NUMBER">'
-        '<input type="hidden"value="TITLE_ID" name="field_title_id_NUMBER" id="field_title_id_NUMBER">'
-        '<input type="hidden"value="GENRE_ID" name="field_genre_id_NUMBER" id="field_genre_id_NUMBER">'
-        '<input type="hidden"value="POPULARITY" name="field_popularity_NUMBER" id="field_popularity_NUMBER">'
-        '<input type="hidden"value="DANCEABILITY" name="field_danceability_NUMBER" id="field_danceability_NUMBER">'
-        '<input type="hidden"value="ENERGY" name="field_energy_NUMBER" id="field_energy_NUMBER">'
-        '<input type="hidden"value="KEY" name="field_key_NUMBER" id="field_key_NUMBER">'
-        '<input type="hidden"value="LOUDNESS" name="field_loudness_NUMBER" id="field_loudness_NUMBER">'
-        '<input type="hidden"value="MODE" name="field_mode_NUMBER" id="field_mode_NUMBER">'
-        '<input type="hidden"value="SPEECHINESS" name="field_speechiness_NUMBER" id="field_speechiness_NUMBER">'
-        '<input type="hidden"value="ACOUSTICNESS" name="field_acousticness_NUMBER" id="field_acousticness_NUMBER">'
-        '<input type="hidden"value="INSTRUMENTALNESS" name="field_instrumentalness_NUMBER" id="field_instrumentalness_NUMBER">'
-        '<input type="hidden"value="LIVENESS" name="field_liveness_NUMBER" id="field_liveness_NUMBER">'
-        '<input type="hidden"value="VALENCE" name="field_valence_NUMBER" id="field_valence_NUMBER">'
-        '<input type="hidden"value="TEMPO" name="field_tempo_NUMBER" id="field_tempo_NUMBER">'
-        '<input type="hidden"value="TYPE" name="field_type_NUMBER" id="field_type_NUMBER">'
-        '<input type="hidden"value="ATTRIB_ID" name="field_id_NUMBER" id="field_id_NUMBER">'
-        '<input type="hidden"value="ATTRIB_URI" name="field_uri_NUMBER" id="field_uri_NUMBER">'
-        '<input type="hidden"value="TRACK_HREF" name="field_track_href_NUMBER" id="field_trackhref_NUMBER">'
-        '<input type="hidden"value="ANALYSIS_URL" name="field_analysis_url_NUMBER" id="field_analysisurl_NUMBER">'
-        '<input type="hidden"value="DURATION_MS" name="field_duration_ms_NUMBER" id="field_durationms_NUMBER">'
-        '<input type="hidden"value="TIME_SIGNATURE" name="field_time_signature_NUMBER" id="field_time_signature_NUMBER">'
-        'ACTION</form></td>'
-        '</tr>'
-    )
-    m_HTMLTableResponse = (
-        '<table style="width:100%">'
-        '<!-- table_content_anchor -->'
-        '</table>'
-    )
-
-    def __init__(self):
-        """Constructor, resets the form handler dictionary
-
-        :return: -
-        :rtype: -
-
+        :param track_data: contain list of tracks
+        :type: list
+        :param artist_info: related artist attributes
+        :type: list
+        :param track_analysis: extended track attributes
+        :type: list
+        :return: string containing filled in html table
+        :rtype: string
         """
-        super().__init__()
+        music_list = str()
+        for i in range(0, len(track_data)):
+            table_row = TrackSelectionHandler.m_HTMLTableRowDescriptor
+            table_row = table_row.replace('ARTIST_ID', track_data[i]['artist'])
+            table_row = table_row.replace('TITLE_ID', track_data[i]['track'])
+            table_row = table_row.replace('TRACK_ID', track_data[i]['track_id'])
+            table_row = table_row.replace('GENRE_ID', ','.join(artist_info[i]['genres']))
+            table_row = table_row.replace('POPULARITY', str(track_data[i]['popularity']))
 
-    def __del__(self):
-        """Destructor, resets the form handler dictionary
+            # table_row = table_row.replace('URI', track_data[i]['uri'])
+            table_row = table_row.replace('DANCEABILITY', str(track_analysis[i]['danceability']))
+            table_row = table_row.replace('ENERGY', str(track_analysis[i]['energy']))
+            table_row = table_row.replace('KEY', str(track_analysis[i]['key']))
+            table_row = table_row.replace('LOUDNESS', str(track_analysis[i]['loudness']))
+            table_row = table_row.replace('MODE', str(track_analysis[i]['mode']))
+            table_row = table_row.replace('SPEECHINESS', str(track_analysis[i]['speechiness']))
+            table_row = table_row.replace('ACOUSTICNESS', str(track_analysis[i]['acousticness']))
+            table_row = table_row.replace('INSTRUMENTALNESS', str(track_analysis[i]['instrumentalness']))
+            table_row = table_row.replace('LIVENESS', str(track_analysis[i]['liveness']))
+            table_row = table_row.replace('VALENCE', str(track_analysis[i]['valence']))
+            table_row = table_row.replace('TEMPO', str(track_analysis[i]['tempo']))
+            table_row = table_row.replace('TYPE', str(track_analysis[i]['type']))
+            table_row = table_row.replace('ATTRIB_ID', str(track_analysis[i]['id']))
+            table_row = table_row.replace('ATTRIB_URI', str(track_analysis[i]['uri']))
+            table_row = table_row.replace('TRACK_HREF', str(track_analysis[i]['track_href']))
+            table_row = table_row.replace('ANALYSIS_URL', str(track_analysis[i]['analysis_url']))
+            table_row = table_row.replace('DURATION_MS', str(track_analysis[i]['duration_ms']))
+            table_row = table_row.replace('TIME_SIGNATURE', str(track_analysis[i]['time_signature']))
 
-        :return: -
-        :rtype: -
+            table_row = table_row.replace('NUMBER', str(i))
+            table_row = table_row.replace('ACTION', str(i))
+            music_list = music_list + table_row
 
-        """
-        super().__del__()
+        table_header = TrackSelectionHandler.m_HTMLHeaderLine
+        table_header = table_header.replace('<!-- header_attachment_anchor -->', music_list)
 
-    def GetParameterSet(self, param_set: dict):
-        """extract parameter set and store it
-
-        :param paramset: dictionary containing all parameters
-        :type: dict
-        :return: -
-        :rtype: -
-
-        """
-        super().GetParameterSet(param_set)
+        table = TrackSelectionHandler.m_HTMLTableResponse
+        table = table.replace('<!-- table_content_anchor -->', table_header)
+        return table
 
     def ConvertDictionary(self):
         """returns a dictionary containing the database elements
@@ -407,109 +367,7 @@ class TrackSelectionHandler(GenericFormHandler):
             logging.error('Dictionary is empty')
 
         return return_value, file_content
-class GenericFormHandler:
-    """This is a conceptual class representation of a generic form interface.
-    Main purpose of the class is parameter extraction related to the opened web page and
-    responding to the request by updating/reloading the html page
 
-    """
-
-    """storage for parameter request
-
-    """
-    m_ParameterSet = None
-    m_ProfileInfo = None
-    m_UserAccessInterface = None
-    m_TrackAttributesAccessInterface = None
-
-    """spotify handler
-
-    """
-    m_Spy = None
-
-    def __init__(self):
-        """Constructor, resets the form handler dictionary
-
-        :return: -
-        :rtype: -
-
-        """
-        self.m_ParameterSet = None
-
-    def __del__(self):
-        """Destructor, resets the form handler dictionary
-
-        :return: -
-        :rtype: -
-
-        """
-        self.m_ParameterSet = None
-
-    def RegisterProfile(self, profile_info):
-        """Register profile object
-
-        :param profile_info: object registers user profile info
-        :type: profile object
-        :return: -
-        :rtype: -
-
-        """
-        self.m_ProfileInfo = profile_info
-
-    def RegisterSpy(self, spy):
-        """Register spy (spotify) object
-
-        :param spy: object handles requests/inqueries to/from spotify
-        :type: spy object
-        :return: -
-        :rtype: -
-
-        """
-        self.m_Spy = spy
-
-    def RegisterUserAccessInterface(self, interface):
-        """Register userinterface  object
-
-        :param spy: object handles requests/inqueries to/from spotify
-        :type: spy object
-        :return: -
-        :rtype: -
-
-        """
-        self.m_UserAccessInterface = interface
-
-    def RegisterTrackAttributesAccessInterface(self, interface):
-        """Register spy (spotify) object
-
-        :param interface:
-        :type: interface object
-        :return: -
-        :rtype: -
-
-        """
-        self.m_TrackAttributesAccessInterface = interface
-
-    @abstractmethod
-    def GetParameterSet(self, param_set: dict):
-        """extract parameter set and store it
-
-        :param param_set: dictionary containing all parameters
-        :type: dict
-        :return: -
-        :rtype: -
-
-        """
-        self.m_ParameterSet = param_set.copy()
-
-    @abstractmethod
-    def CreateResponse(self) -> Tuple[bool, str]:
-        """create html response
-
-        :return: status, html content
-        :rtype: boolean, string
-
-        """
-        pass
 
 class LoginHandler(GenericFormHandler):
     def __init__(self):
@@ -530,17 +388,18 @@ class LoginHandler(GenericFormHandler):
         """
         super().__del__()
 
-    def GetParameterSet(self, param_set: dict):
+    def GetParameterSet(self, session_id: uuid, param_set: dict):
         """extract parameter set and store it
 
-        :param param_set:
-        :param paramset: dictionarycontaining all parameters
+        :param session_id: unique session identifier
+        :type: uuid
+        :param param_set: dictionary containing all parameters
         :type: dict
         :return: -
         :rtype: -
 
         """
-        super().GetParameterSet(param_set)
+        super().GetParameterSet(session_id, param_set)
 
     def CreateResponse(self) -> Tuple[bool, str]:
         """create html response
@@ -577,6 +436,7 @@ class LoginHandler(GenericFormHandler):
                         logging.debug("log in successfull")
                         return_value = True
                         profile_data['validity'] = True
+                        self.m_ProfileInfo.update(profile_data)
                         page_to_open = './html/homepage.html'
                     elif profile_data['username'] != login_username:
                         return_value = True
@@ -608,6 +468,7 @@ class LoginHandler(GenericFormHandler):
                 logging.error("Unable to open file")
                 file_content = []
 
+        SessionManager.UpdateSession(self.m_SessionId, self.m_ProfileInfo)
         return return_value, file_content
 
 
@@ -632,16 +493,18 @@ class SignupHandler(GenericFormHandler):
         # print('Destructor of signup handler called')
         super().__del__()
 
-    def GetParameterSet(self, param_set: dict):
+    def GetParameterSet(self, session_id: uuid, param_set: dict):
         """extract parameter set and store it
 
-        :param paramset: dictionarycontaining all parameters
+        :param session_id:
+        :type uuid
+        :param param_set: dictionary containing all parameters
         :type: dict
         :return: -
         :rtype: -
 
         """
-        super().GetParameterSet(param_set)
+        super().GetParameterSet(session_id, param_set)
 
     def CreateResponse(self) -> Tuple[bool, str]:
         """create html response
@@ -734,6 +597,7 @@ class SignupHandler(GenericFormHandler):
                     return_value = False
                     file_content = []
 
+        SessionManager.UpdateSession(self.m_SessionId, self.m_ProfileInfo)
         return return_value, file_content
 
 
@@ -822,16 +686,18 @@ class ProfileHandler(GenericFormHandler):
                 logging.error("Unable to open index page")
         return return_value, file_content
 
-    def GetParameterSet(self, param_set: dict):
+    def GetParameterSet(self, session_id: uuid, param_set: dict):
         """extract parameter set and store it
 
-        :param paramset: dictionarycontaining all parameters
+        :param session_id: unique session identifier
+        :type: uuid
+        :param param_set: dictionary containing all parameters
         :type: dict
         :return: -
         :rtype: -
 
         """
-        super().GetParameterSet(param_set)
+        super().GetParameterSet(session_id, param_set)
 
     def CreateResponse(self) -> Tuple[bool, str]:
         """create html response
@@ -842,7 +708,7 @@ class ProfileHandler(GenericFormHandler):
         """
         file_content = []
         return_value = False
-        if self.m_ProfileInfo['validate']:
+        if self.m_ProfileInfo['validity']:
             username = self.m_ProfileInfo['username']
             password = self.m_ProfileInfo['password']
             email = self.m_ProfileInfo['email']
@@ -870,16 +736,18 @@ class LogoutHandler(GenericFormHandler):
         """
         super().__del__()
 
-    def GetParameterSet(self, param_set: dict):
+    def GetParameterSet(self, session_id: uuid, param_set: dict):
         """extract parameter set and store it
 
-        :param paramset: dictionarycontaining all parameters
+        :param session_id: unique id representing the session
+        :type uuid
+        :param param_set: dictionary containing all parameters
         :type: dict
         :return: -
         :rtype: -
 
         """
-        super().GetParameterSet(param_set)
+        super().GetParameterSet(session_id, param_set)
 
     def CreateResponse(self) -> Tuple[bool, str]:
         """create html response
@@ -914,16 +782,18 @@ class SongHandler(GenericFormHandler):
         # print('Destructor of logout handler called')
         super().__del__()
 
-    def GetParameterSet(self, param_set: dict):
+    def GetParameterSet(self, session_id: uuid, param_set: dict):
         """extract parameter set and store it
 
-        :param paramset: dictionarycontaining all parameters
+        :param session_id: unique id representing the session
+        :type: uiid
+        :param param_set: dictionary containing all parameters
         :type: dict
         :return: -
         :rtype: -
 
         """
-        super().GetParameterSet(param_set)
+        super().GetParameterSet(session_id, param_set)
 
     def CreateResponse(self) -> Tuple[bool, str]:
         """create html response
@@ -932,7 +802,5 @@ class SongHandler(GenericFormHandler):
         :rtype: boolean, string
 
         """
-        logging.debug('CreateResponse of logout handler called')
-
         logging.debug('CreateResponse of logout handler called')
         return False
