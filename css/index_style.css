@@ -84,15 +84,6 @@ body {
     margin-top: 5rem;
 }
 
-/* homepage filters */
-.filters {
-    display: flex;
-    align: center;
-}
-
-.filters button {
-}
-
 input {
     display: flex;
     text-align: center;
@@ -110,13 +101,18 @@ input {
     text-align: center;
 }
 
+/* homepage recomendation results */
+.recomendation_results td {
+    color: white;
+}
+
 /* homepage search bar results */
-.searchresults td {
+.search_results td {
     color: white;
 }
 
 /* profile page */
-.profile.td {
+.profile td {
     color: white;
 }
 
@@ -130,6 +126,11 @@ input {
     color: white;
     width: 35rem;
     margin-top: 5rem;
+}
+
+/* login status text */
+.login_status {
+    color: white;
 }
 
 .signup {
