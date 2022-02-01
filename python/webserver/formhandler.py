@@ -159,7 +159,7 @@ class HomepageHandler(GenericFormHandler):
         """
         super().__del__()
 
-    def GetParameterSet(self, session_id: int, param_set: dict):
+    def GetParameterSet(self, session_id: uuid, param_set: dict):
         """extract parameter set and store it
 
         :param session_id: unique identifier for the session
