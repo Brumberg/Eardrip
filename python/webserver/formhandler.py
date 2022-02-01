@@ -117,6 +117,30 @@ class GenericFormHandler:
 
 
 class HomepageHandler(GenericFormHandler):
+    m_HTMLHeaderLine = (
+        '<tr>'
+        '<td>artist</td>'
+        '<td>title</td>'
+        '<td>track id</td>'
+        '<td>genre</td>'
+        '<td>popularity</td>'
+        '<td>action</td>'
+        '</tr>'
+        '<!-- header_attachment_anchor -->'
+    )
+    m_HTMLTableRowDescriptor = (
+        '<tr>'
+        '<td>ARTIST_ID</td>'
+        '<td>TITLE_ID</td>'
+        '<td>LINK</td>'
+        '<td>GENRE_ID</td>'
+        '</tr>'
+    )
+    m_HTMLTableResponse = (
+        '<table style="width:100%">'
+        '<!-- table_content_anchor -->'
+        '</table>'
+    )
     def __init__(self):
         """Constructor, resets the form handler dictionary
 
@@ -178,8 +202,22 @@ class HomepageHandler(GenericFormHandler):
             track_analysis = self.m_Spy.GetTrackAnalytics(track_uri)
 
             htmltable = TrackSelectionHandler.FillInHTMLForm(track_data, artist_info, track_analysis)
+            # liketable = FillInLikeTable()
             file_content = file_content.replace('<!-- homepage_result_table -->', htmltable)
+
         return retVal, file_content
+
+
+    def FillInLikeTable(self):
+        #table_row1 = self.m_HTMLTableRowDescriptor
+        #table_row1 = table_row1.replace('ARTIST', 'blabla1')
+        #table_row1 = table_row1.replace('TITLE', 'blabla2')
+        #table_row1 = table_row1.replace('TRACK_ID', 'blabla3')
+        #table_row1 = table_row1.replace('GENRE', 'blabla4')
+        #recomendation_list = recomendation_list + table_row1
+        #table_header1 = self.m_HTMLHeaderLine
+        #table_header1 = table_header1.replace('<!-- header_attachment_anchor -->', recomendation_list)
+        pass
 
 
 class TrackSelectionHandler(GenericFormHandler):
