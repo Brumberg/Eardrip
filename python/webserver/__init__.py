@@ -17,6 +17,9 @@ class GenericWebServer:
     def Initialize(self):
         """default initialization (e.g. reading config struct)
 
+        :return: -
+        :rtype: -
+
         """
         pass
 
@@ -28,6 +31,8 @@ class GenericWebServer:
         :type: string
         :param serverPort: defines the communication port
         :type: int
+        :return: -
+        :rtype: -
 
         """
         pass
@@ -46,8 +51,12 @@ class GenericWebServer:
 
 
 class HTTPWebServer(GenericWebServer):
+    """HTTPWebServer redirects finally queries to the eardrip server. Thus, it is a wrapper class
+
+    """
+
     class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
-        """Handle requests in a separate thread."""
+        """Handle requests in a separate thread - if a multithreaded server is chosen"""
 
     """Actual implementation of the server interface (HTTP).
     It provides the real implementation
@@ -67,14 +76,23 @@ class HTTPWebServer(GenericWebServer):
 
         :param hostName: overrides the default hostname
         :type: string
-        :param serverPort: defines the communication port
+        :param: serverPort: defines the communication port
         :type: int
+        :return: -
+        :rtype: -
 
         """
         self.hostName = hostname
         self.serverPort = serverPort
 
     def StartSingleThreadedServer(self, contentHandler):
+        """instantiates the single threaded http server
+
+        :param contentHandler: handle to the eardrip server
+        :return: -
+        :rtype: -
+
+        """
         self.webServer = HTTPServer((self.hostName, self.serverPort), contentHandler)
         print("Server started http://%s:%s" % (self.hostName, self.serverPort))
         try:
@@ -83,6 +101,13 @@ class HTTPWebServer(GenericWebServer):
             pass
 
     def HTTPBackgroundWorker(self, contentHandler):
+        """background worker thread for http server to avoid blocking the main thread
+
+        :param contentHandler: handle to the eardrip server
+        :return: -
+        :rtype: -
+
+        """
         self.webServer = HTTPWebServer.ThreadedHTTPServer((self.hostName, self.serverPort), contentHandler)
         print("Server started http://%s:%s" % (self.hostName, self.serverPort))
         try:
@@ -94,6 +119,14 @@ class HTTPWebServer(GenericWebServer):
 
 
     def StartMultiThreadedServer(self, contentHandler):
+        """instantiates the multithreaded http server by creating a thread that activates the server
+        The HTTPBackgroundWorker finally instantiates the server
+
+          :param contentHandler: handle to the eardrip server
+          :return: -
+          :rtype: -
+
+          """
         stop_execution = False
 
         #def handler(signum, frame):
@@ -120,7 +153,7 @@ class HTTPWebServer(GenericWebServer):
 
         """Starts the web (http) server
 
-        :param contentHandler: handling of web content
+        :param contentHandler: handle to (eardrip) server class (handles html content)
         :type: class
         :return: -
         :rtype: -

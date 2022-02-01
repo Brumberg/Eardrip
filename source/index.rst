@@ -26,10 +26,11 @@ Documentation
 |
 
 The ``SessionManager`` class
-******************************
+****************************
 .. autoclass:: python.webserver.sessionmanager.SessionManager
     :members:
     :undoc-members:
+    :show-inheritance:
 
 |
 
@@ -38,6 +39,17 @@ The ``SessionManager`` class
 The ``GenericWebServer`` class
 ******************************
 .. autoclass:: python.webserver.GenericWebServer
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+|
+
+|
+
+The ``Eardrip web server`` class
+********************************
+.. autoclass:: python.webserver.eardriphttpserver.EarDripServer
     :members:
     :undoc-members:
     :show-inheritance:
@@ -153,12 +165,6 @@ The ``main`` module
 The ``main`` module
 *******************
 .. autofunction:: main.StartupServer
-
-|
-
-.. autofunction:: main.StartupRema
-
-|
 
 |
 

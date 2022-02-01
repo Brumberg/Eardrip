@@ -33,17 +33,33 @@ class SessionManager:
 
     @classmethod
     def StartScheduer(cls):
+        """start session working thread
+
+         :return: -
+         :rtype: -
+
+         """
         cls.m_Thread = Thread(target=cls.CheckTimeOut, args=[], daemon=True).start()
 
     @classmethod
     def StopScheduer(cls):
+        """terminate session working thread
+
+         :return: -
+         :rtype: -
+
+         """
         if cls.m_Thread is not None:
             cls.m_Thread.stop()
             cls.m_Thread = None
 
     @classmethod
     def CheckTimeOut(cls):
-        """
+        """Session worker thread that calls every SCHEDULER_CYCLIC_TIME sec the function
+        RemoveUnusedConnections() to remove unused connections
+
+        :return: -
+        :rtype: -
 
         """
         while True:
@@ -52,7 +68,11 @@ class SessionManager:
 
     @classmethod
     def RemoveUnusedConnections(cls):
-        """
+        """Checks for connections that are abandoned for at least SESSION_TIMEOUT hours
+        and removes them from the dictionary
+
+        :return: -
+        :rtype: -
 
         """
         with cls.m_SessionLock:
@@ -76,8 +96,8 @@ class SessionManager:
     def CreateUinqueSessionId(cls) -> uuid:
         """Create a unique session id
 
-        :return: session id
-        :rtype: int64
+        :return session id: unique identifier for the session
+        :rtype: uuid
 
         """
         unique_id = None
@@ -171,7 +191,7 @@ class SessionManager:
     def GetSessionContext(cls, session_identifier: uuid):
         """Session Handler
 
-        :param session_identifier:
+        :param session_identifier: contains a unique handle representing the session
         :type: uuid
         :return: session's context
         :rtype: str

@@ -1,3 +1,4 @@
+import uuid
 from abc import ABCMeta, abstractmethod
 from typing import Tuple
 from python.webserver.sessionmanager import SessionManager
@@ -58,7 +59,7 @@ class GenericFormHandler:
     def RegisterSpy(self, spy):
         """Register spy (spotify) object
 
-        :param spy: object handles requests/inqueries to/from spotify
+        :param spy: object handles requests/inquiries to/from spotify
         :type: spy object
         :return: -
         :rtype: -
@@ -69,7 +70,7 @@ class GenericFormHandler:
     def RegisterUserAccessInterface(self, interface):
         """Register userinterface  object
 
-        :param spy: object handles requests/inqueries to/from spotify
+        :param interface: object handles requests/inquiries to/from spotify
         :type: spy object
         :return: -
         :rtype: -
@@ -80,7 +81,7 @@ class GenericFormHandler:
     def RegisterTrackAttributesAccessInterface(self, interface):
         """Register spy (spotify) object
 
-        :param interface:
+        :param interface: interface to track handler (must contain read/write signature)
         :type: interface object
         :return: -
         :rtype: -
@@ -89,10 +90,11 @@ class GenericFormHandler:
         self.m_TrackAttributesAccessInterface = interface
 
     @abstractmethod
-    def GetParameterSet(self, session_id: int, param_set: dict):
+    def GetParameterSet(self, session_id: uuid, param_set: dict):
         """extract parameter set and store it
 
-        :param session_id:
+        :param session_id: unique identifier representing the session
+        :type: uuid
         :param param_set: dictionary containing all parameters
         :type: dict
         :return: -
@@ -136,9 +138,9 @@ class HomepageHandler(GenericFormHandler):
     def GetParameterSet(self, session_id: int, param_set: dict):
         """extract parameter set and store it
 
-        :param param_set:
-        :param session_id:
-        :param paramset: dictionary containing all parameters
+        :param session_id: unique identifier for the session
+        :type: uuid
+        :param param_set: dictionary containing all parameters
         :type: dict
         :return: -
         :rtype: -
@@ -255,9 +257,9 @@ class TrackSelectionHandler(GenericFormHandler):
     def GetParameterSet(self, session_id: int, param_set: dict):
         """extract parameter set and store it
 
-        :param session_id:
-        :param param_set:
-        :param paramset: dictionary containing all parameters
+        :param session_id: unique identifier representing the session
+        :type: uuid
+        :param param_set: set of parameters received from the user
         :type: dict
         :return: -
         :rtype: -
@@ -270,8 +272,11 @@ class TrackSelectionHandler(GenericFormHandler):
         """
 
         :param track_data: contain list of tracks
+        :type: list
         :param artist_info: related artist attributes
+        :type: list
         :param track_analysis: extended track attributes
+        :type: list
         :return: string containing filled in html table
         :rtype: string
         """
@@ -382,12 +387,12 @@ class LoginHandler(GenericFormHandler):
         """
         super().__del__()
 
-    def GetParameterSet(self, session_id: int, param_set: dict):
+    def GetParameterSet(self, session_id: uuid, param_set: dict):
         """extract parameter set and store it
 
-        :param session_id:
-        :param param_set:
-        :param paramset: dictionary containing all parameters
+        :param session_id: unique session identifier
+        :type: uuid
+        :param param_set: dictionary containing all parameters
         :type: dict
         :return: -
         :rtype: -
@@ -487,12 +492,12 @@ class SignupHandler(GenericFormHandler):
         # print('Destructor of signup handler called')
         super().__del__()
 
-    def GetParameterSet(self, session_id: int, param_set: dict):
+    def GetParameterSet(self, session_id: uuid, param_set: dict):
         """extract parameter set and store it
 
         :param session_id:
-        :param param_set:
-        :param paramset: dictionary containing all parameters
+        :type uuid
+        :param param_set: dictionary containing all parameters
         :type: dict
         :return: -
         :rtype: -
@@ -680,12 +685,12 @@ class ProfileHandler(GenericFormHandler):
                 logging.error("Unable to open index page")
         return return_value, file_content
 
-    def GetParameterSet(self, session_id: int, param_set: dict):
+    def GetParameterSet(self, session_id: uuid, param_set: dict):
         """extract parameter set and store it
 
-        :param session_id:
-        :param param_set:
-        :param paramset: dictionary containing all parameters
+        :param session_id: unique session identifier
+        :type: uuid
+        :param param_set: dictionary containing all parameters
         :type: dict
         :return: -
         :rtype: -
@@ -730,12 +735,12 @@ class LogoutHandler(GenericFormHandler):
         """
         super().__del__()
 
-    def GetParameterSet(self, session_id: int, param_set: dict):
+    def GetParameterSet(self, session_id: uuid, param_set: dict):
         """extract parameter set and store it
 
-        :param session_id:
-        :param param_set:
-        :param paramset: dictionary containing all parameters
+        :param session_id: unique id representing the session
+        :type uuid
+        :param param_set: dictionary containing all parameters
         :type: dict
         :return: -
         :rtype: -
@@ -776,12 +781,12 @@ class SongHandler(GenericFormHandler):
         # print('Destructor of logout handler called')
         super().__del__()
 
-    def GetParameterSet(self, session_id: int, param_set: dict):
+    def GetParameterSet(self, session_id: uuid, param_set: dict):
         """extract parameter set and store it
 
-        :param session_id:
-        :param param_set:
-        :param paramset: dictionary containing all parameters
+        :param session_id: unique id representing the session
+        :type: uiid
+        :param param_set: dictionary containing all parameters
         :type: dict
         :return: -
         :rtype: -
@@ -796,7 +801,5 @@ class SongHandler(GenericFormHandler):
         :rtype: boolean, string
 
         """
-        logging.debug('CreateResponse of logout handler called')
-
         logging.debug('CreateResponse of logout handler called')
         return False

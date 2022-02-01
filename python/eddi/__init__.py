@@ -27,7 +27,6 @@ class IUserProfile:
         """function prototype to read user data/profile
 
         :param param_set:
-        :param dict: object containing user profile
         :type: dict object
         :return: error/success
         :rtype: boolean
@@ -40,7 +39,6 @@ class IUserProfile:
         """function prototype to read user data/profile
 
         :param param_set:
-        :param dict: object containing user profile
         :type: dict object
         :return: error/success
         :rtype: boolean
@@ -72,9 +70,8 @@ class ITrackAttributes:
     def read(self, param_set: dict) -> bool:
         """function prototype to read track attributes
 
-        :param param_set:
-        :param dict: object containing user profile
-        :type: dict object
+        :param param_set: dictionary/list containing all values
+        :type: dict/list object
         :return: error/success
         :rtype: boolean
 
@@ -85,9 +82,8 @@ class ITrackAttributes:
     def write(self, param_set: dict) -> bool:
         """function prototype to write track attributes
 
-        :param param_set:
-        :param dict: object containing user profile
-        :type: dict object
+        :param param_set: dictionary/list containing all values
+        :type: dict/list object
         :return: error/success
         :rtype: boolean
 
@@ -179,8 +175,7 @@ class Eddi:
         def read(self, param_set: dict) -> bool:
             """todo: add code to handle read request
 
-            :param param_set:
-            :param dict: object containing user profile
+            :param param_set: dictonary containing all values
             :type: dict object
             :return: error/success
             :rtype: boolean
@@ -191,8 +186,7 @@ class Eddi:
         def write(self, param_set: dict) -> bool:
             """todo: add code to handle write request
 
-            :param param_set:
-            :param dict: object containing user profile
+            :param param_set: dictonary containing all values
             :type: dict object
             :return: error/success
             :rtype: boolean
@@ -243,8 +237,7 @@ class Eddi:
         def read(self, param_set: dict) -> bool:
             """todo: add code to handle read request
 
-            :param param_set:
-            :param dict: object containing user profile
+            :param param_set: dictonary containing all values
             :type: dict object
             :return: error/success
             :rtype: boolean
@@ -283,8 +276,7 @@ class Eddi:
         def write(self, param_set: dict) -> bool:
             """todo: add code to handle write request
 
-            :param param_set:
-            :param dict: object containing user profile
+            :param param_set: dictonary containing all values
             :type: dict object
             :return: error/success
             :rtype: boolean

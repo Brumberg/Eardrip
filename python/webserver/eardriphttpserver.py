@@ -9,6 +9,9 @@ import urllib.parse
 
 
 class EarDripServer(BaseHTTPRequestHandler):
+    """EarDripServer handles queries from/to user
+
+    """
     m_SessionHandler = {}
     m_FormHandler = {}
     m_CallbackHandler = {}
@@ -49,6 +52,14 @@ class EarDripServer(BaseHTTPRequestHandler):
         m_CallbackHandler = {}
 
     def HandleSessionIdentifier(self):
+        """opens a session and creates a session identifier if necessary
+
+        :param self: class instance
+        :type: class
+        :return: -
+        :rtype: -
+
+        """
         cookies = SimpleCookie(self.headers.get('Cookie'))
         if cookies and 'session_id' in cookies:
             session_id = SessionManager.OpenSession(cookies['session_id'].value, self.m_ProfileInfo)
@@ -61,6 +72,14 @@ class EarDripServer(BaseHTTPRequestHandler):
                 self.send_header("Set-Cookie", morsel.OutputString())
 
     def GetSessionIdentifier(self) -> uuid:
+        """returns the unique session identifier
+
+        :param self: instance of server
+        :type: class
+        :return: -
+        :rtype: -
+
+        """
         session_identifier = None
         cookies = SimpleCookie(self.headers.get('Cookie'))
         if cookies and 'session_id' in cookies:
@@ -195,6 +214,8 @@ class EarDripServer(BaseHTTPRequestHandler):
         :type: string
         :param formhandler: manages post requests of web-forms
         :type: derived from GenericFormHandler
+        :return: -
+        :rtype: -
 
         """
         if not formidentifier in EarDripServer.m_FormHandler:

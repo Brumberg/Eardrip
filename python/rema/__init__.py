@@ -32,8 +32,8 @@ class remotedatabase():
     def GetArtistInfo(self, artist_uri):
         """GetArtistInfo returns additional information like the genre
 
-        :param self: list of attributes TBD
-        :type name: list or tuple
+        :param artist_uri: list of artist attributes
+        :type: list or tuple
         :return value: collection of lists of matches
 
         """
@@ -46,9 +46,18 @@ class remotedatabase():
         """GetAttributes return a list of attributes from the spotify playlist. They are finally being used to optimize
         the recommendation algorithm.
 
-        :param self: list of attributes TBD
-        :type name: list or tuple
+        :param track:   list of track names
+        :type: list
+        :param artist:  list of artist names
+        :type: list
+        :param genre:   list of genre names
+        :type: list
+        :param max_no_tracks:   max. number of tracks
+        :type: int
+        :param packet_size: max. number of tracks
+        :type: int
         :return value: collection of lists of matches
+        :rtype: list
 
         """
 
@@ -110,9 +119,10 @@ class remotedatabase():
 
 
 
-        :param self: list of attributes TBD
-        :type name: list or tuple
-        :return value: collection of lists of matches
+        :param track_uri: list of attributes TBD
+        :type track_uri: list or tuple
+        :return: list of features
+        :rtype: list
 
         """
         features = []
