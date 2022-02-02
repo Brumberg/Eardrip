@@ -89,9 +89,6 @@ class SessionManager:
                     cls.m_Session.pop(i, None)
 
 
-
-
-
     @classmethod
     def CreateUinqueSessionId(cls) -> uuid:
         """Create a unique session id
@@ -101,7 +98,7 @@ class SessionManager:
 
         """
         unique_id = None
-        if not cls.m_Session:
+        if cls.m_Session is None:
             unique_id = uuid.uuid1()  # or uuid.uuid4()
         else:
             unique_id = uuid.uuid1()  # or uuid.uuid4()
@@ -166,9 +163,10 @@ class SessionManager:
 
         """
 
-        if cls.m_Session:
-            if session_identifier in cls.m_Session.keys():
-                del cls.m_Session[session_identifier]
+        if cls.m_Session is not None:
+            with cls.m_SessionLock:
+                if session_identifier in cls.m_Session.keys():
+                    del cls.m_Session[session_identifier]
 
     @classmethod
     def UpdateSession(cls, session_identifier: uuid, session_context: str):
@@ -183,9 +181,10 @@ class SessionManager:
 
         """
 
-        if cls.m_Session:
-            if session_identifier in cls.m_Session.keys():
-                cls.m_Session[session_identifier]['session_context'] = session_context
+        if cls.m_Session is not None:
+            with cls.m_SessionLock:
+                if session_identifier in cls.m_Session.keys():
+                    cls.m_Session[session_identifier]['session_context'] = session_context
 
     @classmethod
     def GetSessionContext(cls, session_identifier: uuid):
@@ -198,8 +197,9 @@ class SessionManager:
 
         """
         return_value = None
-        if cls.m_Session:
-            if session_identifier in cls.m_Session.keys():
-                return_value = cls.m_Session[session_identifier]['session_context']
+        if cls.m_Session is not None:
+            with cls.m_SessionLock:
+                if session_identifier in cls.m_Session.keys():
+                    return_value = cls.m_Session[session_identifier]['session_context']
 
         return return_value

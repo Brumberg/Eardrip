@@ -2,6 +2,7 @@ import uuid
 from abc import ABCMeta, abstractmethod
 from typing import Tuple
 from python.webserver.sessionmanager import SessionManager
+import time
 import logging
 import logging.handlers
 import re
@@ -103,6 +104,7 @@ class GenericFormHandler:
         """
         self.m_ParameterSet = param_set.copy()
         self.m_SessionId = session_id
+        time.sleep(0.5)
         self.m_ProfileInfo = SessionManager.GetSessionContext(session_id)
 
     @abstractmethod
