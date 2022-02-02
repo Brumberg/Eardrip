@@ -3,6 +3,7 @@ from python.webserver.sessionmanager import SessionManager
 from python.eddi import Eddi
 from http.cookies import SimpleCookie
 from http.server import HTTPServer, BaseHTTPRequestHandler
+from threading import Lock
 import logging
 import uuid
 import urllib.parse
@@ -18,6 +19,8 @@ class EarDripServer(BaseHTTPRequestHandler):
     m_UserProfileInterface = None
     m_TrackProfileInterface = None
     m_ProfileInfo = None
+    m_Default_Profile = {'validity': False, 'username': 'none', 'password': 'none', 'email': 'empty'}
+    m_SessionLock = Lock()
 
     def __init__(self, *arguments):
         """Constructor, resets the formula handler dictionary
@@ -26,19 +29,20 @@ class EarDripServer(BaseHTTPRequestHandler):
         :rtype: -
 
         """
-        spy = EarDripServer.StartupRema()
-        self.m_CallbackHandler = EarDripServer.m_FormHandler.copy()
-        dbaccess = Eddi()
+        with self.m_SessionLock:
+            spy = EarDripServer.StartupRema()
+            self.m_CallbackHandler = EarDripServer.m_FormHandler.copy()
+            dbaccess = Eddi()
 
-        user_interface = dbaccess.GetUserAccessInterface()
-        track_profile_interface = dbaccess.GetTrackAttributesAccessInterface()
-        self.m_ProfileInfo = {'validity': False, 'username': 'empty', 'password': 'empty', 'email': 'empty'}
+            user_interface = dbaccess.GetUserAccessInterface()
+            track_profile_interface = dbaccess.GetTrackAttributesAccessInterface()
+            self.m_ProfileInfo = self.m_Default_Profile.copy()
 
-        for i in self.m_CallbackHandler:
-            self.m_CallbackHandler[i].RegisterSpy(spy)
-            self.m_CallbackHandler[i].RegisterUserAccessInterface(user_interface)
-            self.m_CallbackHandler[i].RegisterTrackAttributesAccessInterface(track_profile_interface)
-            self.m_CallbackHandler[i].RegisterProfile(self.m_ProfileInfo)
+            for i in self.m_CallbackHandler:
+                self.m_CallbackHandler[i].RegisterSpy(spy)
+                self.m_CallbackHandler[i].RegisterUserAccessInterface(user_interface)
+                self.m_CallbackHandler[i].RegisterTrackAttributesAccessInterface(track_profile_interface)
+                self.m_CallbackHandler[i].RegisterProfile(self.m_ProfileInfo)
 
         BaseHTTPRequestHandler.__init__(self, *arguments)
 
@@ -93,59 +97,61 @@ class EarDripServer(BaseHTTPRequestHandler):
         :rtype: -
 
         """
-        if self.path.endswith('.css'):
-            cssfilepath = '.' + self.path
-            try:
-                logging.info('loading css file {}'.format(cssfilepath))
-                f = open(cssfilepath)
-                self.send_response(200)
-                self.send_header('Content-type', 'text/css')
-                self.end_headers()
-                csscontent = f.read()
-                f.close()
-                self.wfile.write(bytes(csscontent, 'utf-8'))
-            except:
-                file_to_open = "File Not Found"
-                logging.error('CSS file {} not found'.format(cssfilepath))
-                self.send_response(404)
-                self.end_headers()
+        with self.m_SessionLock:
+            if self.path.endswith('.css'):
+                cssfilepath = '.' + self.path
+                try:
+                    logging.info('loading css file {}'.format(cssfilepath))
+                    f = open(cssfilepath)
+                    self.send_response(200)
+                    self.send_header('Content-type', 'text/css')
+                    self.end_headers()
+                    csscontent = f.read()
+                    f.close()
+                    self.wfile.write(bytes(csscontent, 'utf-8'))
+                except:
+                    file_to_open = "File Not Found"
+                    logging.error('CSS file {} not found'.format(cssfilepath))
+                    self.send_response(404)
+                    self.end_headers()
 
-        else:
-            set_access_denied_message = False
-            identifier = self.GetSessionIdentifier()
-            if identifier is not None:
-                info = SessionManager.GetSessionContext(identifier)
-                if info is not None:
-                    self.m_ProfileInfo = info
-
-            if self.path == '/':
-                self.path = './html/index.html'
-            elif self.path == '/index.html':
-                self.path = './html/index.html'
-            elif not self.m_ProfileInfo['validity']:
-                self.path = './html/index.html'
-                set_access_denied_message = True
             else:
-                self.path = './html' + self.path
+                set_access_denied_message = False
+                identifier = self.GetSessionIdentifier()
+                if identifier is not None:
+                    info = SessionManager.GetSessionContext(identifier)
+                    if info is not None:
+                        self.m_ProfileInfo = info
 
-            try:
-                file_to_open = open(self.path[0:]).read()
-                if set_access_denied_message:
-                    file_to_open = file_to_open.replace('<!-- LOGIN_STATUS -->', '<b>Acces denied. You are not signed '
-                                                                                 'in.</b>')
-                    logging.info('loading html file {}. Access denied.'.format(self.path[0:]))
+                if self.path == '/':
+                    self.path = './html/index.html'
+                elif self.path == '/index.html':
+                    self.path = './html/index.html'
+                elif not self.m_ProfileInfo['validity']:
+                    self.path = './html/index.html'
+                    set_access_denied_message = True
                 else:
-                    logging.info('loading html file {}'.format(self.path[0:]))
+                    self.path = './html' + self.path
 
-                self.send_response(200)
-                self.HandleSessionIdentifier()
+                try:
+                    file_to_open = open(self.path[0:]).read()
+                    if set_access_denied_message:
+                        file_to_open = file_to_open.replace('<!-- LOGIN_STATUS -->',
+                                                            '<b>Acces denied. You are not signed '
+                                                            'in.</b>')
+                        logging.info('loading html file {}. Access denied.'.format(self.path[0:]))
+                    else:
+                        logging.info('loading html file {}'.format(self.path[0:]))
 
-            except:
-                file_to_open = "File Not Found"
-                logging.error('loading html file {} failed'.format(self.path[0:]))
-                self.send_response(404)
-            self.end_headers()
-            self.wfile.write(bytes(file_to_open, 'utf-8'))
+                    self.send_response(200)
+                    self.HandleSessionIdentifier()
+
+                except:
+                    file_to_open = "File Not Found"
+                    logging.error('loading html file {} failed'.format(self.path[0:]))
+                    self.send_response(404)
+                self.end_headers()
+                self.wfile.write(bytes(file_to_open, 'utf-8'))
         return  # BaseHTTPRequestHandler.do_GET(self)
 
     def do_POST(self):
@@ -155,45 +161,46 @@ class EarDripServer(BaseHTTPRequestHandler):
         :rtype: -
 
         """
-        content_length = int(self.headers['Content-Length'])  # <--- Gets the size of data
-        self.data_string = self.rfile.read(int(self.headers['Content-Length']))
-        self.keyvalue = dict(urllib.parse.parse_qsl(self.data_string))
-        session_id = self.GetSessionIdentifier()
-        try:
-            if b'FormIdentifier' in self.keyvalue:
-                logging.info('Key FormIdentifier exists with value {}'.format(self.keyvalue[b'FormIdentifier']))
-                if self.keyvalue[b'FormIdentifier'] in self.m_CallbackHandler:
-                    logging.info('Executing callback')
-                    callbacksel = self.keyvalue[b'FormIdentifier']
-                    self.m_CallbackHandler[callbacksel].GetParameterSet(session_id, self.keyvalue)
-                    status, file_to_open = self.m_CallbackHandler[callbacksel].CreateResponse()
-                    if status == False:
-                        file_to_open = "Unregistered web page"
-                        self.send_response(404)
-                    else:
-                        logging.info('Request OK')
-                        self.send_response(200)
+        with self.m_SessionLock:
+            content_length = int(self.headers['Content-Length'])  # <--- Gets the size of data
+            self.data_string = self.rfile.read(int(self.headers['Content-Length']))
+            self.keyvalue = dict(urllib.parse.parse_qsl(self.data_string))
+            session_id = self.GetSessionIdentifier()
+            try:
+                if b'FormIdentifier' in self.keyvalue:
+                    logging.info('Key FormIdentifier exists with value {}'.format(self.keyvalue[b'FormIdentifier']))
+                    if self.keyvalue[b'FormIdentifier'] in self.m_CallbackHandler:
+                        logging.info('Executing callback')
+                        callbacksel = self.keyvalue[b'FormIdentifier']
+                        self.m_CallbackHandler[callbacksel].GetParameterSet(session_id, self.keyvalue)
+                        status, file_to_open = self.m_CallbackHandler[callbacksel].CreateResponse()
+                        if not status:
+                            file_to_open = "Unregistered web page"
+                            self.send_response(404)
+                        else:
+                            logging.info('Request OK')
+                            self.send_response(200)
 
+                    else:
+                        logging.error('Page has no identifier')
                 else:
-                    logging.error('Page has no identifier')
-            else:
-                logging.warning('Requested page {} has no form identifier'.format(self.path))
-                errorpage = 'html/profile.html'
-                try:
-                    file_to_open = open(errorpage).read()
-                    logging.info('Responding with default error page')
-                except:
-                    file_to_open = 'Can not load default error page'
-                    logging.error('Default error page does not exist')
-                # song = self.keyvalue[b'songname'].decode('utf-8')
-                # file_to_open = file_to_open.replace('{favouritesong}', song)
-                self.send_response(200)
-        except:
-            file_to_open = "File Not Found"
-            logging.error('Requested page {} has no form identifier'.format(self.path))
-            self.send_response(404)
-        self.end_headers()
-        self.wfile.write(bytes(file_to_open, 'utf-8'))
+                    logging.warning('Requested page {} has no form identifier'.format(self.path))
+                    errorpage = 'html/profile.html'
+                    try:
+                        file_to_open = open(errorpage).read()
+                        logging.info('Responding with default error page')
+                    except:
+                        file_to_open = 'Can not load default error page'
+                        logging.error('Default error page does not exist')
+                    # song = self.keyvalue[b'songname'].decode('utf-8')
+                    # file_to_open = file_to_open.replace('{favouritesong}', song)
+                    self.send_response(200)
+            except:
+                file_to_open = "File Not Found"
+                logging.error('Requested page {} has no form identifier'.format(self.path))
+                self.send_response(404)
+            self.end_headers()
+            self.wfile.write(bytes(file_to_open, 'utf-8'))
 
     @staticmethod
     def StartupRema():
@@ -218,7 +225,7 @@ class EarDripServer(BaseHTTPRequestHandler):
         :rtype: -
 
         """
-        if not formidentifier in EarDripServer.m_FormHandler:
+        if formidentifier not in EarDripServer.m_FormHandler:
             EarDripServer.m_FormHandler[formidentifier] = formhandler
             logging.info('Parameter {} registered'.format(formidentifier))
         else:

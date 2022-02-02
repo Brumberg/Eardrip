@@ -104,7 +104,6 @@ class GenericFormHandler:
         """
         self.m_ParameterSet = param_set.copy()
         self.m_SessionId = session_id
-        time.sleep(0.5)
         self.m_ProfileInfo = SessionManager.GetSessionContext(session_id)
 
     @abstractmethod
