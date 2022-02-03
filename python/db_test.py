@@ -15,7 +15,7 @@ def createdatabase():
 
 # creates a table
 def createtable():
-    mycursor.execute("CREATE TABLE user_ (username VARCHAR(50), password VARCHAR(50), email VARCHAR(50), userID int PRIMARY KEY AUTO_INCREMENT)")
+    mycursor.execute("CREATE TABLE user (username VARCHAR(50), password VARCHAR(50), email VARCHAR(50), userID int PRIMARY KEY AUTO_INCREMENT)")
 
 def deletetable():
     mycursor.execute("DROP TABLE users")

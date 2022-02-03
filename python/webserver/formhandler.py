@@ -201,25 +201,7 @@ class HomepageHandler(GenericFormHandler):
 
             artist_info = self.m_Spy.GetArtistInfo(artist_uri)
             track_analysis = self.m_Spy.GetTrackAnalytics(track_uri)
-
-            htmltable = TrackSelectionHandler.FillInHTMLForm(track_data, artist_info, track_analysis)
-            # liketable = FillInLikeTable()
-            file_content = file_content.replace('<!-- homepage_result_table -->', htmltable)
-
-        return retVal, file_content
-
-
-    def FillInLikeTable(self):
-        #table_row1 = self.m_HTMLTableRowDescriptor
-        #table_row1 = table_row1.replace('ARTIST', 'blabla1')
-        #table_row1 = table_row1.replace('TITLE', 'blabla2')
-        #table_row1 = table_row1.replace('TRACK_ID', 'blabla3')
-        #table_row1 = table_row1.replace('GENRE', 'blabla4')
-        #recomendation_list = recomendation_list + table_row1
-        #table_header1 = self.m_HTMLHeaderLine
-        #table_header1 = table_header1.replace('<!-- header_attachment_anchor -->', recomendation_list)
-        pass
-
+        return retVal
 
 class TrackSelectionHandler(GenericFormHandler):
     m_HTMLHeaderLine = (
@@ -244,6 +226,7 @@ class TrackSelectionHandler(GenericFormHandler):
         '<button>dislike</button>'
         '<button name="tlike" value="tlike">like</button>'
         '<input type="hidden" id="FormIdentifier" name="FormIdentifier" value="trackselection_form">'
+        '<input type="hidden" id="userID_NUMBER" name="userID_NUMBER" value="USERID">'
         '<input type="hidden" value="TRACK_ID" name="field_track_id_NUMBER" id="field_track_id_NUMBER">'
         '<input type="hidden" value="ARTIST_ID_NUMBER" name="field_artist_id_NUMBER" id="field_artist_id_NUMBER">'
         '<input type="hidden"value="TITLE_ID" name="field_title_id_NUMBER" id="field_title_id_NUMBER">'
@@ -308,7 +291,7 @@ class TrackSelectionHandler(GenericFormHandler):
         super().GetParameterSet(session_id, param_set)
 
     @classmethod
-    def FillInHTMLForm(cls, track_data: list, artist_info: list, track_analysis: list) -> str:
+    def FillInHTMLForm(cls, track_data: list, artist_info: list, track_analysis: list, userID: int) -> str:
         """
 
         :param track_data: contain list of tracks
@@ -348,6 +331,7 @@ class TrackSelectionHandler(GenericFormHandler):
             table_row = table_row.replace('ANALYSIS_URL', str(track_analysis[i]['analysis_url']))
             table_row = table_row.replace('DURATION_MS', str(track_analysis[i]['duration_ms']))
             table_row = table_row.replace('TIME_SIGNATURE', str(track_analysis[i]['time_signature']))
+            table_row = table_row.replace('USERID', userID)
 
             table_row = table_row.replace('NUMBER', str(i))
             table_row = table_row.replace('ACTION', str(i))
@@ -453,8 +437,7 @@ class LoginHandler(GenericFormHandler):
             try:
                 login_username = self.m_ParameterSet[b'login_usernameid'].decode('utf-8')
                 login_password = self.m_ParameterSet[b'login_passwordid'].decode('utf-8')
-                profile_data = {'validity': False, 'username': login_username, 'password': login_password,
-                            'email': 'unknown'}
+                profile_data = {'validity': False, 'username': login_username, 'password': login_password, 'email': 'unknown'}
 
                 page_to_open = './html/index.html'
                 # searches database for the username
@@ -681,7 +664,7 @@ class ProfileHandler(GenericFormHandler):
         super().__del__()
 
     @staticmethod
-    def Update(username, password, email) -> Tuple[bool, str]:
+    def Update(username, password, email, userID) -> Tuple[bool, str]:
         """Update, fills out profile form
 
         :param username: username
@@ -751,7 +734,8 @@ class ProfileHandler(GenericFormHandler):
             username = self.m_ProfileInfo['username']
             password = self.m_ProfileInfo['password']
             email = self.m_ProfileInfo['email']
-            return_value, file_content = ProfileHandler.Update(username, password,email)
+            userID = self.m_ProfileInfo['userID']
+            return_value, file_content = ProfileHandler.Update(username, password,email, userID)
 
         return return_value, file_content
 

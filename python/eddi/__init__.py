@@ -271,6 +271,10 @@ class Eddi:
                 cursor.reset()
                 cursor.execute("SELECT email FROM user WHERE username = '%s'" % param_set['username'])
                 real_login_email = cursor.fetchone()
+                cursor.reset()
+                cursor.execute("SELECT userID FROM user WHERE username = '%s'" % param_set['username'])
+                param_set['userID'] = cursor.fetchone()
+                cursor.reset()
                 if real_login_username is not None:
                     param_set['username'] = real_login_username[0]
                 else:
@@ -303,8 +307,7 @@ class Eddi:
             return_value = True
             try:
                 cursor = self.m_Parent.m_DataBase.cursor()
-                cursor.execute("INSERT INTO user (username, password, email) VALUES (%s, %s, %s)",
-                               (param_set['username'], param_set['password'], param_set['email']))
+                cursor.execute("INSERT INTO user (username, password, email) VALUES (%s, %s, %s)", (param_set['username'], param_set['password'], param_set['email']))
                 self.m_Parent.m_DataBase.commit()
             except:
                 return_value = False
