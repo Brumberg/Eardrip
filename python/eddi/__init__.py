@@ -69,7 +69,7 @@ class ITrackAttributes:
         pass
 
     @abstractmethod
-    def read(self, param_set: dict) -> bool:
+    def read(self, param_set: dict, userID) -> bool:
         """function prototype to read track attributes
 
         :param param_set:
@@ -97,7 +97,7 @@ class ITrackAttributes:
 
 class Eddi:
     """Handles data base access
-    Wraps all calls to and from the database (EardDipDatabaseInterface)
+    Wraps all calls to and from the database (EarDipDatabaseInterface)
     responding to the request by updating/reloading the html page
     """
     m_DataBase = None
@@ -153,7 +153,7 @@ class Eddi:
         """
         m_Parent = None
 
-        """Handles data base access for the profile
+        """Handles database access for the profile
         Wraps all calls to and from the database (EarDripDatabaseInterface)
         responding to the request by updating/reloading the html page
         """
@@ -176,7 +176,7 @@ class Eddi:
             """
             pass
 
-        def read(self, param_set: dict) -> bool:
+        def read(self, param_set: [dict], userID) -> bool:
             """todo: add code to handle read request
             :param param_set:
             :param dict: object containing user profile
@@ -186,16 +186,23 @@ class Eddi:
 
             """
 
+            cursor = self.m_Parent.m_DataBase.cursor()
 
-            username_id = (m_parent)
+            cursor.execute("SELECT * FROM trackdata WHERE user_id = '%s'" % userID)
+            selectedtracks = cursor.fetchall()
+            selected_tracks_dictionary_list = []
 
-            mycursor.execute("SELECT * FROM trackdata WHERE field_title_id = '%s'" % username_id)
-            trackinfo = mycursor.fetchone()
-
-            trackinfo = ', '.join(trackinfo)
-            print(trackinfo)
-
-            return False
+            for x in selectedtracks:
+                dictionary = dict()
+                dictionary["ARTIST_ID"] = x[0]
+                dictionary["TITLE_ID"] = x[1]
+                dictionary["TRACK_ID"] = x[2]
+                dictionary["GENRE_ID"] = x[3]
+                dictionary["POPULARITY"] = x[4]
+                selected_tracks_dictionary_list.append(dictionary)
+            cursor.reset()
+            param_set = selected_tracks_dictionary_list
+            return True
             # return dictionary instead of false
 
         def write(self, param_set: dict) -> bool:

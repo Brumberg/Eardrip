@@ -101,6 +101,11 @@ input {
     text-align: center;
 }
 
+.algorithm_button {
+    display: flex;
+    align: center;
+}
+
 /* homepage recomendation results */
 .recomendation_results td {
     color: white;

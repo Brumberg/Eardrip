@@ -7,7 +7,6 @@ import logging
 import logging.handlers
 import re
 
-
 class GenericFormHandler:
     """This is a conceptual class representation of a generic form interface.
     Main purpose of the class is parameter extraction related to the opened web page and
@@ -105,6 +104,7 @@ class GenericFormHandler:
         self.m_ParameterSet = param_set.copy()
         self.m_SessionId = session_id
         self.m_ProfileInfo = SessionManager.GetSessionContext(session_id)
+        #self.m_user_tracks_selected
 
     @abstractmethod
     def CreateResponse(self) -> Tuple[bool, str]:
@@ -199,9 +199,21 @@ class HomepageHandler(GenericFormHandler):
                 track_uri.append(track_data[i]['uri'])
                 artist_uri.append(track_data[i]['artist_uri'])
 
+            artist = self.m_Spy.GetArtistInfo(artist_uri)
+            track_analysis = self.m_Spy.GetTrackAnalytics(track_uri)
+
+            track_selected_list = []
             artist_info = self.m_Spy.GetArtistInfo(artist_uri)
             track_analysis = self.m_Spy.GetTrackAnalytics(track_uri)
-        return retVal
+            retVal = self.m_TrackAttributesAccessInterface.read(track_selected_list, self.m_ProfileInfo["userID"])
+
+            trackselectiontable = SelectedTrackHandler.FillInHTMLForm(track_selected_list)
+            htmltable = TrackSelectionHandler.FillInHTMLForm(track_data, artist_info, track_analysis)
+
+            file_content = file_content.replace('<!-- homepage_selected_tracks_table -->', trackselectiontable)
+            file_content = file_content.replace('<!-- homepage_result_table -->', htmltable)
+
+        return retVal, file_content
 
 class TrackSelectionHandler(GenericFormHandler):
     m_HTMLHeaderLine = (
@@ -253,6 +265,7 @@ class TrackSelectionHandler(GenericFormHandler):
         'ACTION</form></td>'
         '</tr>'
     )
+
     m_HTMLTableResponse = (
         '<table style="width:100%">'
         '<!-- table_content_anchor -->'
@@ -342,6 +355,105 @@ class TrackSelectionHandler(GenericFormHandler):
 
         table = TrackSelectionHandler.m_HTMLTableResponse
         table = table.replace('<!-- table_content_anchor -->', table_header)
+
+        return table
+
+class SelectedTrackHandler(GenericFormHandler):
+    m_HTMLSelectedTracksHeaderLine = (
+        '<tr>'
+        '<td>artist</td>'
+        '<td>title</td>'
+        '<td>track id</td>'
+        '<td>genre</td>'
+        '<td>popularity</td>'
+        '<td>action</td>'
+        '</tr>'
+        '<!-- header_attachment_anchor1 -->'
+    )
+    m_HTMLTrackSelectedTableRowDescriptor = (
+        '<tr>'
+        '<td>ARTIST_ID</td>'
+        '<td>TITLE_ID</td>'
+        '<td>TRACK_ID</td>'
+        '<td>GENRE_ID</td>'
+        '<td>POPULARITY</td>'
+        '<input type="hidden" id="FormIdentifier" name="FormIdentifier" value="trackselection_form">'
+        '<input type="hidden" id="userID_NUMBER" name="userID_NUMBER" value="USERID">'
+        '<input type="hidden" value="TRACK_ID" name="field_track_id_NUMBER" id="field_track_id_NUMBER">'
+        '<input type="hidden" value="ARTIST_ID_NUMBER" name="field_artist_id_NUMBER" id="field_artist_id_NUMBER">'
+        '<input type="hidden"value="TITLE_ID" name="field_title_id_NUMBER" id="field_title_id_NUMBER">'
+        '<input type="hidden"value="GENRE_ID" name="field_genre_id_NUMBER" id="field_genre_id_NUMBER">'
+        '<input type="hidden"value="POPULARITY" name="field_popularity_NUMBER" id="field_popularity_NUMBER">'
+    )
+    m_HTMLTableResponse = (
+        '<table style="width:100%">'
+        '<!-- table_content_anchor -->'
+        '</table>'
+    )
+
+    def __init__(self):
+        """Constructor, resets the form handler dictionary
+
+        :return: -
+        :rtype: -
+
+        """
+        super().__init__()
+
+    def __del__(self):
+        """Destructor, resets the form handler dictionary
+
+        :return: -
+        :rtype: -
+
+        """
+        super().__del__()
+
+    def GetParameterSet(self, session_id: int, param_set: dict):
+        """extract parameter set and store it
+
+        :param session_id: unique identifier representing the session
+        :type: uuid
+        :param param_set: set of parameters received from the user
+        :type: dict
+        :return: -
+        :rtype: -
+
+        """
+        super().GetParameterSet(session_id, param_set)
+
+    @classmethod
+    def FillInHTMLForm(cls, selected_tracks_dictionary_list) -> str:
+        """
+
+        :param track_data: contain list of tracks
+        :type: list
+        :param artist_info: related artist attributes
+        :type: list
+        :param track_analysis: extended track attributes
+        :type: list
+        :return: string containing filled in html table
+        :rtype: string
+        """
+        self.m_TrackAttributesAccessInterface = database_access.read()
+
+        track_selected_list = str()
+        for i in selected_tracks_dictionary_list:
+            table_row = TrackSelectionHandler.m_HTMLTrackSelectedTableRowDescriptor
+            table_row = table_row.replace('ARTIST_ID', i["ARTIST_ID"])
+            table_row = table_row.replace('TITLE_ID', i["TITLE_ID"])
+            table_row = table_row.replace('TRACK_ID', i["TRACK_ID"])
+            table_row = table_row.replace('GENRE_ID', i["GENRE_ID"])
+            table_row = table_row.replace('POPULARITY', i["POPULARITY"])
+
+            track_selected_list = track_selected_list + table_row
+
+        table_header = TrackSelectionHandler.m_HTMLHeaderLine
+        table_header = table_header.replace('<!-- header_attachment_anchor -->', track_selected_list)
+
+        table = TrackSelectionHandler.m_HTMLTableResponse
+        table = table.replace('<!-- table_content_anchor -->', table_header)
+
         return table
 
     def ConvertDictionary(self):
@@ -391,6 +503,115 @@ class TrackSelectionHandler(GenericFormHandler):
 
         return return_value, file_content
 
+class AlgorithmHandler(GenericFormHandler):
+    """This is a conceptual class representation of a generic form interface.
+    Main purpose of the class is parameter extraction related to the opened web page and
+    responding to the request by updating/reloading the html page
+
+    """
+
+    """storage for parameter request
+
+    """
+    m_ParameterSet = None
+    m_ProfileInfo = None
+    m_UserAccessInterface = None
+    m_TrackAttributesAccessInterface = None
+    m_SessionId = None
+    """spotify handler
+
+    """
+    m_Spy = None
+
+    def __init__(self):
+        """Constructor, resets the form handler dictionary
+
+        :return: -
+        :rtype: -
+
+        """
+        self.m_ParameterSet = None
+
+    def __del__(self):
+        """Destructor, resets the form handler dictionary
+
+        :return: -
+        :rtype: -
+
+        """
+        self.m_ParameterSet = None
+
+    def RegisterProfile(self, profile_info):
+        """Register profile object
+
+        :param profile_info: object registers user profile info
+        :type: profile object
+        :return: -
+        :rtype: -
+
+        """
+        self.m_ProfileInfo = profile_info
+
+    def RegisterSpy(self, spy):
+        """Register spy (spotify) object
+
+        :param spy: object handles requests/inquiries to/from spotify
+        :type: spy object
+        :return: -
+        :rtype: -
+
+        """
+        self.m_Spy = spy
+
+    def RegisterUserAccessInterface(self, interface):
+        """Register userinterface  object
+
+        :param interface: object handles requests/inquiries to/from spotify
+        :type: spy object
+        :return: -
+        :rtype: -
+
+        """
+        self.m_UserAccessInterface = interface
+
+    def RegisterTrackAttributesAccessInterface(self, interface):
+        """Register spy (spotify) object
+
+        :param interface: interface to track handler (must contain read/write signature)
+        :type: interface object
+        :return: -
+        :rtype: -
+
+        """
+        self.m_TrackAttributesAccessInterface = interface
+
+    @abstractmethod
+    def GetParameterSet(self, session_id: uuid, param_set: dict):
+        """extract parameter set and store it
+
+        :param session_id: unique identifier representing the session
+        :type: uuid
+        :param param_set: dictionary containing all parameters
+        :type: dict
+        :return: -
+        :rtype: -
+
+        """
+        self.m_ParameterSet = param_set.copy()
+        self.m_SessionId = session_id
+        self.m_ProfileInfo = SessionManager.GetSessionContext(session_id)
+        #self.m_user_tracks_selected
+
+    @abstractmethod
+    def CreateResponse(self) -> Tuple[bool, str]:
+        """create html response
+
+        :return: status, html content
+        :rtype: boolean, string
+
+        """
+
+        pass
 
 class LoginHandler(GenericFormHandler):
     def __init__(self):

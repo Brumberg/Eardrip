@@ -94,10 +94,15 @@ def trackdata():
     mycursor.execute ("INSERT INTO trackdata (field_track_id, field_artist_id, field_title_id, field_genre_id, field_popularity, field_danceability, field_energy, field_key, field_loudness, field_mode, field_speechiness, field_acousticness, field_instrumentalness, field_liveness, field_valence, field_tempo, field_type, field_id, field_uri, field_track_href, field_analysis_url, field_duration_ms, field_time_signature) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (TRACK, ARTIST, TITLE, GENRE, POPULARITY, DANCEABILITY, ENERGY, KEY, LOUDNESS, MODE, SPEECHINESS, ACOUSTICNESS, INSTRUMENTALNESS, LIVENESS, VALENCE, TEMPO, TYPE, ID, URI, HREF, URL, MS, TIMESIGNATURE))
     db.commit()
 
-songname = ("hello")
+dictionarylist = []
 
-mycursor.execute("SELECT * FROM trackdata WHERE field_title_id = '%s'" % songname)
-trackinfo = mycursor.fetchone()
+mycursor.execute("SELECT * FROM user")
+selectedtracks = mycursor.fetchall()
+for x in selectedtracks:
+    dictionary = dict()
+    dictionary["username"] = x [0]
+    dictionary["password"] = x [1]
+    dictionary["email"] = x [2]
+    dictionarylist.append(dictionary)
 
-trackinfo = ', '.join(trackinfo)
-print(trackinfo)
+print(dictionarylist)

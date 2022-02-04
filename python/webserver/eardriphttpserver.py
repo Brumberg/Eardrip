@@ -136,9 +136,7 @@ class EarDripServer(BaseHTTPRequestHandler):
                 try:
                     file_to_open = open(self.path[0:]).read()
                     if set_access_denied_message:
-                        file_to_open = file_to_open.replace('<!-- LOGIN_STATUS -->',
-                                                            '<b>Acces denied. You are not signed '
-                                                            'in.</b>')
+                        file_to_open = file_to_open.replace('<!-- LOGIN_STATUS -->','<b>Acces denied. You are not signed ''in.</b>')
                         logging.info('loading html file {}. Access denied.'.format(self.path[0:]))
                     else:
                         logging.info('loading html file {}'.format(self.path[0:]))
