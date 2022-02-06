@@ -69,7 +69,7 @@ class ITrackAttributes:
         pass
 
     @abstractmethod
-    def read(self, param_set: dict, userID) -> bool:
+    def read(self, userID) -> (bool, [dict]):
         """function prototype to read track attributes
 
         :param param_set:
@@ -176,7 +176,7 @@ class Eddi:
             """
             pass
 
-        def read(self, param_set: [dict], userID) -> bool:
+        def read(self, userID) -> (bool, [dict]):
             """todo: add code to handle read request
             :param param_set:
             :param dict: object containing user profile
@@ -192,17 +192,20 @@ class Eddi:
             selectedtracks = cursor.fetchall()
             selected_tracks_dictionary_list = []
 
-            for x in selectedtracks:
-                dictionary = dict()
-                dictionary["ARTIST_ID"] = x[0]
-                dictionary["TITLE_ID"] = x[1]
-                dictionary["TRACK_ID"] = x[2]
-                dictionary["GENRE_ID"] = x[3]
-                dictionary["POPULARITY"] = x[4]
-                selected_tracks_dictionary_list.append(dictionary)
-            cursor.reset()
+            if selectedtracks == None:
+                return False
+            else:
+                for x in selectedtracks:
+                    dictionary = dict()
+                    dictionary["ARTIST_ID"] = x[0]
+                    dictionary["TITLE_ID"] = x[1]
+                    dictionary["TRACK_ID"] = x[2]
+                    dictionary["GENRE_ID"] = x[3]
+                    dictionary["POPULARITY"] = x[4]
+                    selected_tracks_dictionary_list.append(dictionary)
+                cursor.reset()
             param_set = selected_tracks_dictionary_list
-            return True
+            return True, param_set
             # return dictionary instead of false
 
         def write(self, param_set: dict) -> bool:
@@ -220,7 +223,7 @@ class Eddi:
                 cursor = self.m_Parent.m_DataBase.cursor()
                 qkeys = ', '.join(param_set.keys())
                 qvalues = ', '.join("'%s'" % s for s in param_set.values())
-                qry = "INSERT INTO trackdata (%s) Values (%s)" % (qkeys, qvalues)
+                qry = "INSERT INTO trackdata (%s) VALUES (%s)" % (qkeys, qvalues)
                 cursor.execute(qry)
                 self.m_Parent.m_DataBase.commit()
                 return_value = True
@@ -280,7 +283,8 @@ class Eddi:
                 real_login_email = cursor.fetchone()
                 cursor.reset()
                 cursor.execute("SELECT userID FROM user WHERE username = '%s'" % param_set['username'])
-                param_set['userID'] = cursor.fetchone()
+                username_tuple = cursor.fetchone()
+                param_set ['userID'] = username_tuple[0]
                 cursor.reset()
                 if real_login_username is not None:
                     param_set['username'] = real_login_username[0]

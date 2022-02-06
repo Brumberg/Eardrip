@@ -205,13 +205,15 @@ class HomepageHandler(GenericFormHandler):
             track_selected_list = []
             artist_info = self.m_Spy.GetArtistInfo(artist_uri)
             track_analysis = self.m_Spy.GetTrackAnalytics(track_uri)
-            retVal = self.m_TrackAttributesAccessInterface.read(track_selected_list, self.m_ProfileInfo["userID"])
+            retVal, track_selected_list = self.m_TrackAttributesAccessInterface.read(self.m_ProfileInfo["userID"])
 
-            trackselectiontable = SelectedTrackHandler.FillInHTMLForm(track_selected_list)
-            htmltable = TrackSelectionHandler.FillInHTMLForm(track_data, artist_info, track_analysis)
+            if len(track_selected_list) > 0:
+                trackselectiontable = SelectedTrackHandler.FillInHTMLForm(track_selected_list)
+                file_content = file_content.replace('<!-- homepage_selected_tracks_table -->', trackselectiontable)
 
-            file_content = file_content.replace('<!-- homepage_selected_tracks_table -->', trackselectiontable)
-            file_content = file_content.replace('<!-- homepage_result_table -->', htmltable)
+            if len(track_data) > 0:
+                htmltable = TrackSelectionHandler.FillInHTMLForm(track_data, artist_info, track_analysis, self.m_ProfileInfo["userID"])
+                file_content = file_content.replace('<!-- homepage_result_table -->', htmltable)
 
         return retVal, file_content
 
@@ -238,7 +240,7 @@ class TrackSelectionHandler(GenericFormHandler):
         '<button>dislike</button>'
         '<button name="tlike" value="tlike">like</button>'
         '<input type="hidden" id="FormIdentifier" name="FormIdentifier" value="trackselection_form">'
-        '<input type="hidden" id="userID_NUMBER" name="userID_NUMBER" value="USERID">'
+        '<input type="hidden" id="user_id_NUMBER" name="user_id_NUMBER" value="USERID">'
         '<input type="hidden" value="TRACK_ID" name="field_track_id_NUMBER" id="field_track_id_NUMBER">'
         '<input type="hidden" value="ARTIST_ID_NUMBER" name="field_artist_id_NUMBER" id="field_artist_id_NUMBER">'
         '<input type="hidden"value="TITLE_ID" name="field_title_id_NUMBER" id="field_title_id_NUMBER">'
@@ -304,7 +306,7 @@ class TrackSelectionHandler(GenericFormHandler):
         super().GetParameterSet(session_id, param_set)
 
     @classmethod
-    def FillInHTMLForm(cls, track_data: list, artist_info: list, track_analysis: list, userID: int) -> str:
+    def FillInHTMLForm(cls, track_data: list, artist_info: list, track_analysis: list, userID: str) -> str:
         """
 
         :param track_data: contain list of tracks
@@ -344,7 +346,7 @@ class TrackSelectionHandler(GenericFormHandler):
             table_row = table_row.replace('ANALYSIS_URL', str(track_analysis[i]['analysis_url']))
             table_row = table_row.replace('DURATION_MS', str(track_analysis[i]['duration_ms']))
             table_row = table_row.replace('TIME_SIGNATURE', str(track_analysis[i]['time_signature']))
-            table_row = table_row.replace('USERID', userID)
+            table_row = table_row.replace('USERID', str(userID))
 
             table_row = table_row.replace('NUMBER', str(i))
             table_row = table_row.replace('ACTION', str(i))
@@ -357,6 +359,54 @@ class TrackSelectionHandler(GenericFormHandler):
         table = table.replace('<!-- table_content_anchor -->', table_header)
 
         return table
+
+    def ConvertDictionary(self):
+        """returns a dictionary containing the database elements
+
+        :return: status, html content
+        :rtype: boolean, string
+
+        """
+
+        dict = {}
+        for key, value in self.m_ParameterSet.items():
+            a = key.decode("utf-8")
+            match = re.search (r"_\d$", a)
+            if match:
+                a = a[0:match.start()]
+
+            dict[a] = value.decode("utf-8")
+
+        return dict
+
+    def CreateResponse(self) -> Tuple[bool, str]:
+        """create html response
+
+        :return: status, html content
+        :rtype: boolean, string
+
+        """
+        file_content = []
+        return_value = False
+
+        if self.m_ParameterSet:
+            dataset = self.ConvertDictionary()
+            dataset.pop('FormIdentifier', None)
+            if self.m_TrackAttributesAccessInterface.write(dataset):
+                try:
+                    file_content = open('./html/homepage.html').read()
+                    return_value = True
+                except OSError:
+                    return_value = False
+                    logging.error('Unable to open home page')
+            else:
+                return_value = False
+                logging.error('Dictionary is empty')
+        else:
+            return_value = False
+            logging.error('Dictionary is empty')
+
+        return return_value, file_content
 
 class SelectedTrackHandler(GenericFormHandler):
     m_HTMLSelectedTracksHeaderLine = (
@@ -377,13 +427,7 @@ class SelectedTrackHandler(GenericFormHandler):
         '<td>TRACK_ID</td>'
         '<td>GENRE_ID</td>'
         '<td>POPULARITY</td>'
-        '<input type="hidden" id="FormIdentifier" name="FormIdentifier" value="trackselection_form">'
-        '<input type="hidden" id="userID_NUMBER" name="userID_NUMBER" value="USERID">'
-        '<input type="hidden" value="TRACK_ID" name="field_track_id_NUMBER" id="field_track_id_NUMBER">'
-        '<input type="hidden" value="ARTIST_ID_NUMBER" name="field_artist_id_NUMBER" id="field_artist_id_NUMBER">'
-        '<input type="hidden"value="TITLE_ID" name="field_title_id_NUMBER" id="field_title_id_NUMBER">'
-        '<input type="hidden"value="GENRE_ID" name="field_genre_id_NUMBER" id="field_genre_id_NUMBER">'
-        '<input type="hidden"value="POPULARITY" name="field_popularity_NUMBER" id="field_popularity_NUMBER">'
+        '</tr>'
     )
     m_HTMLTableResponse = (
         '<table style="width:100%">'
@@ -435,11 +479,10 @@ class SelectedTrackHandler(GenericFormHandler):
         :return: string containing filled in html table
         :rtype: string
         """
-        self.m_TrackAttributesAccessInterface = database_access.read()
 
         track_selected_list = str()
         for i in selected_tracks_dictionary_list:
-            table_row = TrackSelectionHandler.m_HTMLTrackSelectedTableRowDescriptor
+            table_row = SelectedTrackHandler.m_HTMLTrackSelectedTableRowDescriptor
             table_row = table_row.replace('ARTIST_ID', i["ARTIST_ID"])
             table_row = table_row.replace('TITLE_ID', i["TITLE_ID"])
             table_row = table_row.replace('TRACK_ID', i["TRACK_ID"])
@@ -448,10 +491,10 @@ class SelectedTrackHandler(GenericFormHandler):
 
             track_selected_list = track_selected_list + table_row
 
-        table_header = TrackSelectionHandler.m_HTMLHeaderLine
+        table_header = SelectedTrackHandler.m_HTMLSelectedTracksHeaderLine
         table_header = table_header.replace('<!-- header_attachment_anchor -->', track_selected_list)
 
-        table = TrackSelectionHandler.m_HTMLTableResponse
+        table = SelectedTrackHandler.m_HTMLTableResponse
         table = table.replace('<!-- table_content_anchor -->', table_header)
 
         return table
@@ -610,7 +653,7 @@ class AlgorithmHandler(GenericFormHandler):
         :rtype: boolean, string
 
         """
-
+        print("abc")
         pass
 
 class LoginHandler(GenericFormHandler):
