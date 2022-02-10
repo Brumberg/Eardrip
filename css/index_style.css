@@ -111,6 +111,11 @@ input {
     color: white;
 }
 
+/* homepage recomendation results */
+.selected_tracks td {
+    color: white;
+}
+
 /* homepage search bar results */
 .search_results td {
     color: white;

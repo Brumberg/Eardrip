@@ -188,25 +188,29 @@ class Eddi:
 
             cursor = self.m_Parent.m_DataBase.cursor()
 
-            cursor.execute("SELECT * FROM trackdata WHERE user_id = '%s'" % userID)
+            param_set = []
+
+            cursor.execute("SELECT * FROM trackdata WHERE userID = '%s'" % userID)
             selectedtracks = cursor.fetchall()
+            column_names = cursor.column_names
             selected_tracks_dictionary_list = []
+
+            cursor.reset()
 
             if selectedtracks == None:
                 return False
             else:
+
                 for x in selectedtracks:
+                    counter = (0)
                     dictionary = dict()
-                    dictionary["ARTIST_ID"] = x[0]
-                    dictionary["TITLE_ID"] = x[1]
-                    dictionary["TRACK_ID"] = x[2]
-                    dictionary["GENRE_ID"] = x[3]
-                    dictionary["POPULARITY"] = x[4]
-                    selected_tracks_dictionary_list.append(dictionary)
-                cursor.reset()
-            param_set = selected_tracks_dictionary_list
+                    for i in column_names:
+                        dictionary[i] = x[counter]
+                        counter = (counter + 1)
+
+                    param_set.append(dictionary)
+
             return True, param_set
-            # return dictionary instead of false
 
         def write(self, param_set: dict) -> bool:
             """todo: add code to handle write request

@@ -240,9 +240,9 @@ class TrackSelectionHandler(GenericFormHandler):
         '<button>dislike</button>'
         '<button name="tlike" value="tlike">like</button>'
         '<input type="hidden" id="FormIdentifier" name="FormIdentifier" value="trackselection_form">'
-        '<input type="hidden" id="user_id_NUMBER" name="user_id_NUMBER" value="USERID">'
+        '<input type="hidden" id="userID_NUMBER" name="userID_NUMBER" value="USERID">'
         '<input type="hidden" value="TRACK_ID" name="field_track_id_NUMBER" id="field_track_id_NUMBER">'
-        '<input type="hidden" value="ARTIST_ID_NUMBER" name="field_artist_id_NUMBER" id="field_artist_id_NUMBER">'
+        '<input type="hidden" value="ARTIST_ID" name="field_artist_id_NUMBER" id="field_artist_id_NUMBER">'
         '<input type="hidden"value="TITLE_ID" name="field_title_id_NUMBER" id="field_title_id_NUMBER">'
         '<input type="hidden"value="GENRE_ID" name="field_genre_id_NUMBER" id="field_genre_id_NUMBER">'
         '<input type="hidden"value="POPULARITY" name="field_popularity_NUMBER" id="field_popularity_NUMBER">'
@@ -416,9 +416,8 @@ class SelectedTrackHandler(GenericFormHandler):
         '<td>track id</td>'
         '<td>genre</td>'
         '<td>popularity</td>'
-        '<td>action</td>'
         '</tr>'
-        '<!-- header_attachment_anchor1 -->'
+        '<!-- header_attachment_anchor -->'
     )
     m_HTMLTrackSelectedTableRowDescriptor = (
         '<tr>'
@@ -483,11 +482,11 @@ class SelectedTrackHandler(GenericFormHandler):
         track_selected_list = str()
         for i in selected_tracks_dictionary_list:
             table_row = SelectedTrackHandler.m_HTMLTrackSelectedTableRowDescriptor
-            table_row = table_row.replace('ARTIST_ID', i["ARTIST_ID"])
-            table_row = table_row.replace('TITLE_ID', i["TITLE_ID"])
-            table_row = table_row.replace('TRACK_ID', i["TRACK_ID"])
-            table_row = table_row.replace('GENRE_ID', i["GENRE_ID"])
-            table_row = table_row.replace('POPULARITY', i["POPULARITY"])
+            table_row = table_row.replace('ARTIST_ID', i["field_artist_id"])
+            table_row = table_row.replace('TITLE_ID', i["field_title_id"])
+            table_row = table_row.replace('TRACK_ID', i["field_track_id"])
+            table_row = table_row.replace('GENRE_ID', i["field_genre_id"])
+            table_row = table_row.replace('POPULARITY', i["field_popularity"])
 
             track_selected_list = track_selected_list + table_row
 
@@ -645,6 +644,44 @@ class AlgorithmHandler(GenericFormHandler):
         self.m_ProfileInfo = SessionManager.GetSessionContext(session_id)
         #self.m_user_tracks_selected
 
+    def SpotifyFilter(self):
+
+        retVal, track_selected_list = self.m_TrackAttributesAccessInterface.read(self.m_ProfileInfo["userID"])
+
+
+        cycled_genres = []
+        most_popular_genre = ()
+        most_popular_genre_count = ()
+
+        for i in track_selected_list:
+            current_genre = (i["field_genre_id"])
+
+            if current_genre not in cycled_genres:
+
+                for x in track_selected_list:
+                    counter = (0)
+                    if x["field_genre_id"] == current_genre:
+                        print ("")
+                        counter = (counter + 1)
+
+                    else:
+                        print ("")
+
+                cycled_genres.append(current_genre)
+                temp_genre = (current_genre)
+                temp_genre_counter = (counter)
+
+                if temp_genre_counter > most_popular_genre_count:
+                    most_popular_genre = (temp_genre)
+                    most_popular_genre_count = (temp_genre_counter)
+
+            else:
+                print("genre already counted")
+
+        print(most_popular_genre)
+        print(most_popular_genre_count)
+
+        return retVal, file_content
     @abstractmethod
     def CreateResponse(self) -> Tuple[bool, str]:
         """create html response
@@ -653,8 +690,10 @@ class AlgorithmHandler(GenericFormHandler):
         :rtype: boolean, string
 
         """
-        print("abc")
-        pass
+
+
+
+        return self.SpotifyFilter()
 
 class LoginHandler(GenericFormHandler):
     def __init__(self):
