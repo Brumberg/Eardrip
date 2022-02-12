@@ -7,6 +7,7 @@ import logging
 import logging.handlers
 import re
 
+
 class GenericFormHandler:
     """This is a conceptual class representation of a generic form interface.
     Main purpose of the class is parameter extraction related to the opened web page and
@@ -648,38 +649,33 @@ class AlgorithmHandler(GenericFormHandler):
 
         retVal, track_selected_list = self.m_TrackAttributesAccessInterface.read(self.m_ProfileInfo["userID"])
 
-
-        cycled_genres = []
+        cycled_genres = {}
         most_popular_genre = ()
         most_popular_genre_count = ()
+        genre_list = []
+        genre_list_temp = []
 
         for i in track_selected_list:
-            current_genre = (i["field_genre_id"])
+            returned_genres = (i["field_genre_id"])
+            genre_list_temp = returned_genres.split(",")
+            genre_list = genre_list + genre_list_temp
 
+        for z in genre_list:
+
+            current_genre = z
             if current_genre not in cycled_genres:
+                cycled_genres[current_genre] = 1
 
-                for x in track_selected_list:
-                    counter = (0)
-                    if x["field_genre_id"] == current_genre:
-                        print ("")
-                        counter = (counter + 1)
-
-                    else:
-                        print ("")
-
-                cycled_genres.append(current_genre)
-                temp_genre = (current_genre)
-                temp_genre_counter = (counter)
-
-                if temp_genre_counter > most_popular_genre_count:
-                    most_popular_genre = (temp_genre)
-                    most_popular_genre_count = (temp_genre_counter)
 
             else:
-                print("genre already counted")
+                cycled_genres[current_genre] = cycled_genres[current_genre] + (1)
 
-        print(most_popular_genre)
-        print(most_popular_genre_count)
+        sorted_cycled_genres = sorted(cycled_genres.items(), key = lambda x:x[1], reverse = True)
+
+        print(sorted_cycled_genres)
+
+        top_genre = sorted_cycled_genres[0][0]
+        print(top_genre)
 
         return retVal, file_content
     @abstractmethod
