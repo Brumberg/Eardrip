@@ -6,7 +6,8 @@
 
 
         <!-- search bar icons from fontawsome -->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+
 
         <!-- font imports -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,13 +23,14 @@
             <!--logo,login/sign up and profile navigaton-->
             <div class="navigation">
                 <nav>
-                    <div class="logo">EARDRIP</div>
+                   <div class="logo"><i class="fa-solid fa-headphones"></i> - EARDRIP</div>
                     <div class="menu">
-                        <a href="index.html"><button>Homepage</button></a>
-                            <a href="HowToUse.html"><button>How To Use</button></a>
-                        </form>
+                            <a href="homepage.html"><button>Homepage</button></a>
+
+                            <a href="howtouse.html"><button>How To Use</button></a>
+
                         <form name="profileform" action="" method="post">
-                            <a href="profile.html"><button>Profile</button></a>
+                            <a href="profile.html"><button class="profile-button">Profile</button></a>
                             <input type="hidden" id="FormIdentifier" name="FormIdentifier" value="profile_form">
                         </form>
                     </div>
@@ -41,29 +43,36 @@
             <form name="homepageform" action="" onsubmit="return validateForm()" method="post">
                 <input type="hidden" id="FormIdentifier" name="FormIdentifier" value="homepage_form">
                 <div class="searchbar">
-                    <input type="search_input" name="homepage_songtitle" placeholder="Search by song name . . ." >
+                    <input type="text" name="homepage_songtitle" placeholder="Search by song name . . ." >
                     <a href="homepage.html"><button><div class="fa fa-search"></div></button></a>
                 </div>
             </form>
         </div></center>
 
-
-        <form name="algorithm_button_form" action="" onsubmit="return validateForm()" method="post">
-            <div class="algorithm_button"><button>Start Algorithm</button></div>
-            <input type="hidden" id="FormIdentifier" name="FormIdentifier" value="algorithm_button_form">
-        </form>
+        <div class="algorithm_button">
+            <form name="algorithm_button_form" action="" onsubmit="return validateForm()" method="post">
+                <button>Start Algorithm<i class="fa-solid fa-compact-disc right-icon"></i></button>
+                <input type="hidden" id="FormIdentifier" name="FormIdentifier" value="algorithm_button_form">
+            </form>
+        </div>
 
         <!-- tables -->
         <div class="recommendation_results"
+             <table>
                 <!-- homepage_recomendation_table -->
+             </table>
         </div>
+        <div class="small-spacer"></div>
         <div class="selected_tracks"
              <table>
                 <!-- homepage_selected_tracks_table -->
              </table>
         </div>
+        <div class="small-spacer"></div>
         <div class="search_results">
+            <table>
                 <!-- homepage_result_table -->
+            </table>
         </div>
     </body>
 

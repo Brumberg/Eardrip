@@ -1,6 +1,8 @@
 /* #CD5C5C - Light red */
 /* #181818 - Lighter Black */
 /* #707070 - Grey for head splitter */
+/* #FFAAAA - Brighter red */
+/* #550000 - Darker red */
 
 * {
     box-sizing: border-box;
@@ -12,6 +14,7 @@
 /* navigation bar */
 .navigation {
     position: fixed;
+    z-index: 1000;
     background-color: #181818;
     /* head splitter line*/
     border-bottom: 1px solid #707070;
@@ -24,6 +27,10 @@ nav {
     align-items: center;
     margin: 0 1rem 0 1rem;
     color: white;
+}
+
+.profile-button {
+    margin-top: 4px;
 }
 
 /* navigation bar buttons */
@@ -68,7 +75,7 @@ body {
 
 /* search bar */
 .searchbar_container {
-    padding: 2rem;
+    padding: 2rem 2rem 0.7rem 2rem;
 
 }
 
@@ -85,7 +92,6 @@ body {
 }
 
 input {
-    display: flex;
     text-align: center;
     margin: 0 0.5rem 0 0.5rem;
     width: 100%;
@@ -97,15 +103,29 @@ input {
 /* text inside homepage search bar*/
 ::placeholder {
     color: white;
-    display: flex;
     text-align: center;
 }
 
-.algorithm_button {
-    display: flex;
-    align: center;
+::focus {
+    background: #CD5C5C;
 }
 
+.algorithm_button {
+    width: 10rem;
+    margin: auto;
+    position: relative;
+}
+
+.algorithm_button button {
+    width: 100%;
+    font-size: 0.7rem;
+}
+
+.right-icon{
+    position: absolute;
+    right: 1rem;
+    top: 0.6rem;
+}
 /* homepage recomendation results */
 .recommendation_results td {
     color: white;
@@ -125,17 +145,18 @@ input {
 .profile td {
     color: white;
 }
-
+.login_signup{
+    padding-top: 10rem;
+}
 .login {
-    width: 100%;
-    display: flex;
-    align: center;
-    background: #CD5C5C;
+    text-align: center;
+    background: #FFAAAA;
     padding: 0.5rem;
-    border-radius: 1rem;
+    border-radius: 1rem 1rem 0rem 1rem;
     color: white;
     width: 35rem;
-    margin-top: 5rem;
+    margin:auto;
+    position: relative;
 }
 
 /* login status text */
@@ -144,13 +165,65 @@ input {
 }
 
 .signup {
-    width: 100%;
-    display: flex;
-    align: center;
-    background: #CD5C5C;
+    text-align: center;
+    background: #FFAAAA;
     padding: 0.5rem;
-    border-radius: 1rem;
+    border-radius: 1rem 1rem 0rem 1rem;
     color: white;
     width: 35rem;
+    margin:auto;
     margin-top: 5rem;
+    position: relative
+}
+
+.login_signup input{
+    margin: 0.5rem auto;
+    width: 80%;
+    border-radius: 1rem;
+    line-height: 2em;
+}
+
+.right{
+    position: absolute;
+    right: 1rem;
+    top: 0.8rem;
+}
+
+.content {
+    padding-top: 10rem;
+    width: 60%;
+    margin: auto;
+    color: black;
+    background: #FFAAAA;
+    padding: 1rem;
+    border-radius: 1rem 1rem 0rem 1rem;
+}
+
+.spacer {
+    height: 10rem;
+}
+
+.small-spacer {
+    height: 2rem;
+}
+
+table {
+    background: #FFAAAA;
+    border-collapse: collapse;
+    cell-spacing: 0;
+    cell-padding: 0;
+    padding: 0;
+    margin: 0;
+    width: 90%;
+    border-radius: 1rem 1rem 0 1rem;
+    margin: auto;
+    padding: 1rem;
+}
+
+table td{
+    padding: 0.3rem 0.5rem;
+}
+
+table tr:nth-child(even) {
+    background: #550000;
 }

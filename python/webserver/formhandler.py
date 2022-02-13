@@ -238,7 +238,6 @@ class TrackSelectionHandler(GenericFormHandler):
         '<td>GENRE_ID</td>'
         '<td>POPULARITY</td>'
         '<td><form name="TABLE_FORM_ACTION" action="" method="post">'
-        '<button>dislike</button>'
         '<button name="tlike" value="tlike">like</button>'
         '<input type="hidden" id="FormIdentifier" name="FormIdentifier" value="trackselection_form">'
         '<input type="hidden" id="userID_NUMBER" name="userID_NUMBER" value="USERID">'
@@ -246,31 +245,15 @@ class TrackSelectionHandler(GenericFormHandler):
         '<input type="hidden" value="ARTIST_ID" name="field_artist_id_NUMBER" id="field_artist_id_NUMBER">'
         '<input type="hidden"value="TITLE_ID" name="field_title_id_NUMBER" id="field_title_id_NUMBER">'
         '<input type="hidden"value="GENRE_ID" name="field_genre_id_NUMBER" id="field_genre_id_NUMBER">'
-        '<input type="hidden"value="POPULARITY" name="field_popularity_NUMBER" id="field_popularity_NUMBER">'
-        '<input type="hidden"value="DANCEABILITY" name="field_danceability_NUMBER" id="field_danceability_NUMBER">'
-        '<input type="hidden"value="ENERGY" name="field_energy_NUMBER" id="field_energy_NUMBER">'
-        '<input type="hidden"value="KEY" name="field_key_NUMBER" id="field_key_NUMBER">'
-        '<input type="hidden"value="LOUDNESS" name="field_loudness_NUMBER" id="field_loudness_NUMBER">'
-        '<input type="hidden"value="MODE" name="field_mode_NUMBER" id="field_mode_NUMBER">'
-        '<input type="hidden"value="SPEECHINESS" name="field_speechiness_NUMBER" id="field_speechiness_NUMBER">'
-        '<input type="hidden"value="ACOUSTICNESS" name="field_acousticness_NUMBER" id="field_acousticness_NUMBER">'
-        '<input type="hidden"value="INSTRUMENTALNESS" name="field_instrumentalness_NUMBER" id="field_instrumentalness_NUMBER">'
-        '<input type="hidden"value="LIVENESS" name="field_liveness_NUMBER" id="field_liveness_NUMBER">'
-        '<input type="hidden"value="VALENCE" name="field_valence_NUMBER" id="field_valence_NUMBER">'
-        '<input type="hidden"value="TEMPO" name="field_tempo_NUMBER" id="field_tempo_NUMBER">'
-        '<input type="hidden"value="TYPE" name="field_type_NUMBER" id="field_type_NUMBER">'
-        '<input type="hidden"value="ATTRIB_ID" name="field_id_NUMBER" id="field_id_NUMBER">'
         '<input type="hidden"value="ATTRIB_URI" name="field_uri_NUMBER" id="field_uri_NUMBER">'
         '<input type="hidden"value="TRACK_HREF" name="field_track_href_NUMBER" id="field_trackhref_NUMBER">'
         '<input type="hidden"value="ANALYSIS_URL" name="field_analysis_url_NUMBER" id="field_analysisurl_NUMBER">'
-        '<input type="hidden"value="DURATION_MS" name="field_duration_ms_NUMBER" id="field_durationms_NUMBER">'
-        '<input type="hidden"value="TIME_SIGNATURE" name="field_time_signature_NUMBER" id="field_time_signature_NUMBER">'  
         'ACTION</form></td>'
         '</tr>'
     )
 
     m_HTMLTableResponse = (
-        '<table style="width:100%">'
+        '<table>'
         '<!-- table_content_anchor -->'
         '</table>'
     )
@@ -430,7 +413,7 @@ class SelectedTrackHandler(GenericFormHandler):
         '</tr>'
     )
     m_HTMLTableResponse = (
-        '<table style="width:100%">'
+        '<table>'
         '<!-- table_content_anchor -->'
         '</table>'
     )
@@ -571,8 +554,6 @@ class AlgorithmHandler(GenericFormHandler):
         '<td>artist</td>'
         '<td>title</td>'
         '<td>track id</td>'
-        '<td>genre</td>'
-        '<td>popularity</td>'
         '</tr>'
         '<!-- header_attachment_anchor -->'
     )
@@ -580,9 +561,7 @@ class AlgorithmHandler(GenericFormHandler):
         '<tr>'
         '<td>ARTIST_ID</td>'
         '<td>TITLE_ID</td>'
-        '<td>TRACK_ID</td>'
-        '<td>GENRE_ID</td>'
-        '<td>POPULARITY</td>'
+        '<td><a href= "https://open.spotify.com/track/TRACK_ID" target="_blank">TITLE_ID</a></td>'
         '<input type="hidden" id="FormIdentifier" name="FormIdentifier" value="trackselection_form">'
         '<input type="hidden" id="userID_NUMBER" name="userID_NUMBER" value="USERID">'
         '<input type="hidden" value="TRACK_ID" name="field_track_id_NUMBER" id="field_track_id_NUMBER">'
@@ -592,7 +571,7 @@ class AlgorithmHandler(GenericFormHandler):
         '</tr>'
     )
     m_HTMLTableResponse = (
-        '<table style="width:100%">'
+        '<table>'
         '<!-- table_content_anchor -->'
         '</table>'
     )
@@ -709,7 +688,6 @@ class AlgorithmHandler(GenericFormHandler):
             if current_genre not in cycled_genres:
                 cycled_genres[current_genre] = 1
 
-
             else:
                 cycled_genres[current_genre] = cycled_genres[current_genre] + (1)
 
@@ -735,17 +713,17 @@ class AlgorithmHandler(GenericFormHandler):
         recomendation_list = str()
 
         for i in range(0, len(top_genre)):
-            table_row = TrackSelectionHandler.m_HTMLTableRowDescriptor
+            table_row = AlgorithmHandler.m_HTMLTableRowDescriptor
             table_row = table_row.replace('ARTIST_ID', top_genre[i]['artist'])
             table_row = table_row.replace('TITLE_ID', top_genre[i]['track'])
-            table_row = table_row.replace('TRACK_HREF', str(top_genre[i]['artist_uri']))
+            table_row = table_row.replace('TRACK_ID', str(top_genre[i]['track_id']))
 
             recomendation_list = recomendation_list + table_row
 
-        table_header = TrackSelectionHandler.m_HTMLHeaderLine
+        table_header = AlgorithmHandler.m_HTMLHeaderLine
         table_header = table_header.replace('<!-- header_attachment_anchor -->', recomendation_list)
 
-        table = TrackSelectionHandler.m_HTMLTableResponse
+        table = AlgorithmHandler.m_HTMLTableResponse
         table = table.replace('<!-- table_content_anchor -->', table_header)
 
         return table
@@ -1113,6 +1091,184 @@ class ProfileHandler(GenericFormHandler):
             return_value, file_content = ProfileHandler.Update(username, password,email, userID)
 
         return return_value, file_content
+
+
+class LogoutHandler(GenericFormHandler):
+    def __init__(self):
+        """Constructor, resets the formular handler dictionary
+
+        :return: -
+        :rtype: -
+
+        """
+        super().__init__()
+
+    def __del__(self):
+        """Destructor, resets the formular handler dictionary
+
+        :return: -
+        :rtype: -
+
+        """
+        super().__del__()
+
+    def GetParameterSet(self, session_id: uuid, param_set: dict):
+        """extract parameter set and store it
+
+        :param session_id: unique id representing the session
+        :type uuid
+        :param param_set: dictionary containing all parameters
+        :type: dict
+        :return: -
+        :rtype: -
+
+        """
+        super().GetParameterSet(session_id, param_set)
+
+    def CreateResponse(self) -> Tuple[bool, str]:
+        """create html response
+
+        :return: status, html content
+        :rtype: boolean, string
+
+        """
+        logging.debug('CreateResponse of logout handler called')
+        file_content = []
+        return False
+
+
+class SongHandler(GenericFormHandler):
+    def __init__(self):
+        """Constructor, resets the formular handler dictionary
+
+        :return: -
+        :rtype: -
+
+        """
+        # print('Constructor of logout handler called')
+        super().__init__()
+
+    def __del__(self):
+        """Destructor, resets the formular handler dictionary
+
+        :return: -
+        :rtype: -
+
+        """
+        # print('Destructor of logout handler called')
+        super().__del__()
+
+    def GetParameterSet(self, session_id: uuid, param_set: dict):
+        """extract parameter set and store it
+
+        :param session_id: unique id representing the session
+        :type: uiid
+        :param param_set: dictionary containing all parameters
+        :type: dict
+        :return: -
+        :rtype: -
+
+        """
+        super().GetParameterSet(session_id, param_set)
+
+    def CreateResponse(self) -> Tuple[bool, str]:
+        """create html response
+
+        :return: status, html content
+        :rtype: boolean, string
+
+        """
+        logging.debug('CreateResponse of logout handler called')
+        return False
+
+class HowToUseForm(GenericFormHandler):
+
+    def __init__(self):
+        """Constructor, resets the formular handler dictionary
+
+        :return: -
+        :rtype: -
+
+        """
+        super().__init__()
+
+    def __del__(self):
+        """Destructor, resets the formula handler dictionary
+
+        :return: -
+        :rtype: -
+
+        """
+        super().__del__()
+
+    @staticmethod
+    def Update(username, password, email, userID) -> Tuple[bool, str]:
+        """Update, fills out profile form
+
+        :param username: username
+        :type: string
+        :param password: password
+        :type: string
+        :param email: email
+        :type: string
+        :return: return_value, html content
+        :rtype: boolean, string
+
+        """
+        try:
+            file_content = open('./html/profile.html').read()
+            return_value = True
+        except OSError:
+            return_value = False
+            file_content = []
+            logging.error("Unable to open profile page")
+
+        if return_value:
+            details_list = str()
+            table_row = ProfileHandler.m_HTMLTableRowDescriptor
+            table_row = table_row.replace('USERNAME', username)
+            table_row = table_row.replace('PASSWORD', password)
+            table_row = table_row.replace('EMAIL', email)
+            details_list = table_row
+
+            table_header = ProfileHandler.m_HTMLHeaderLine
+            table_header = table_header.replace('<!-- header_attachment_anchor -->', details_list)
+
+            table = ProfileHandler.m_HTMLTableResponse
+            table = table.replace('<!-- table_content_anchor -->', table_header)
+            file_content = file_content.replace('<!-- profile_result_table -->', table)
+        else:
+            try:
+                file_content = open('./html/index.html').read()
+                return_value = True
+            except OSError:
+                return_value = False
+                logging.error("Unable to open index page")
+        return return_value, file_content
+
+    def GetParameterSet(self, session_id: uuid, param_set: dict):
+        """extract parameter set and store it
+
+        :param session_id: unique session identifier
+        :type: uuid
+        :param param_set: dictionary containing all parameters
+        :type: dict
+        :return: -
+        :rtype: -
+
+        """
+        super().GetParameterSet(session_id, param_set)
+
+    def CreateResponse(self) -> Tuple[bool, str]:
+        """create html response
+
+        :return: status, html content
+        :rtype: boolean, string
+
+        """
+        file_content = open('./html/howtouse.html').read()
+
+        return file_content
 
 
 class LogoutHandler(GenericFormHandler):

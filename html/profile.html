@@ -6,7 +6,7 @@
 
 
         <!-- search bar icons from fontawsome -->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 
         <!-- font imports -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,19 +18,27 @@
     </head>
 
     <body>
-            <nav>
-                <!--logo,login/sign up and profile navigation-->
-                <div class="logo">EARDRIP</div>
-                <div class="menu">
-                    <a href="homepage.html"><button>Homepage</button></a>
-                    <a href="HowToUse.html"><button>How To Use</button></a>
-                    <a href="profile.html"><button>Profile</button></a>
-                </div>
-            </nav>
+        <div>
+            <!--logo,login/sign up and profile navigaton-->
+            <div class="navigation">
+                <nav>
+                   <div class="logo"><i class="fa-solid fa-headphones"></i> - EARDRIP</div>
+                    <div class="menu">
+                            <a href="homepage.html"><button>Homepage</button></a>
+
+                            <a href="howtouse.html"><button>How To Use</button></a>
+
+                        <form name="profileform" action="" method="post">
+                            <a href="profile.html"><button class="profile-button">Profile</button></a>
+                            <input type="hidden" id="FormIdentifier" name="FormIdentifier" value="profile_form">
+                        </form>
+                    </div>
+                </nav>
+            </div>
+            <div class="spacer"></div>
                 <div class="profile">Profile
                     <!-- profile_result_table -->
                 </div>
-        </form>
     </body>
 
 </html>

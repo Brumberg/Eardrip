@@ -6,7 +6,7 @@
 
 
         <!-- search bar icons from fontawsome -->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 
         <!-- font imports -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,80 +16,90 @@
         <!-- imports css-->
         <link rel="stylesheet" href="../CSS/index_style.css">
     </head>
+        <script>
+            function validateForm() {
+                let retVal = validateUser();
+                if (retVal != 0)
+                {
+                    retVal = validatePassword()
+                }
+                return retVal;
+            }
+
+            function validateUser() {
+                let x = document.forms["signupform"]["signup_userid"].value;
+                if (x == "") {
+                    alert("Name must be filled out");
+                    return false;
+                }
+                else if (x.length<5) {
+                    alert("Name must consist of at least 5 letters");
+                    return false;
+                }
+                else {
+                    return true;
+                }
+            }
+
+            function validatePassword() {
+                let x = document.forms["signupform"]["signup_passwordid"].value;
+                if (x == "") {
+                    alert("Password must be filled in");
+                    return false;
+                }
+                else if (x.length<5) {
+                    alert("Password must consist of at least 5 letters");
+                    return false;
+                }
+                else {
+                    return true;
+                }
+            }
+        </script>
+    </head>
 
     <body>
-
-            <nav>
-                <!-- logo,login/sign up and profile navigation-->
-                <div class="logo">EARDRIP</div>
-            </nav>
+        <div>
+            <!--logo,login/sign up and profile navigaton-->
+            <div class="navigation">
+                <nav>
+                   <div class="logo"><i class="fa-solid fa-headphones"></i> - EARDRIP</div>
+                    <div class="menu">
+                        <a href="howtouse.html"><button>How To Use</button></a>
+                    </div>
+                </nav>
+            </div>
+        </div>
 
             <!-- log in and sgin up features -->
             <div class="login_signup">
 
                 <form name="loginform" action="" onsubmit="return validateForm()" method="post">
-                    <div class="login">Log In
+                    <div class="login">
+                        <h2>Log In <i class="fa-solid fa-user right"></i></h2>
+
                         <input type="text" name="login_usernameid" id="login_usernameid" value="" placeholder="username . . ." />
-                        <div class="login_username_check"><button>Check</button></div>
+                        <!--<div class="login_username_check"><button>Check</button></div>-->
 
                         <input type="text" name="login_passwordid" id="login_passwordid" value="" placeholder="password . . ." />
-                        <div class="login_password_check"><button>Check</button></div>
+                        <div class="login_password_check"><button>Login in</button></div>
                     </div>
-                <input type="hidden" id="FormIdentifier" name="FormIdentifier" value="login_form">
+                    <input type="hidden" id="FormIdentifier" name="FormIdentifier" value="login_form">
                 </form>
 
                 <form name="signupform" action=""  method="post">
-				    <div class="signup">Sign Up
-                        <script>
-                            function validateForm() {
-                                let retVal = validateUser();
-                                if (retVal != 0)
-                                {
-                                    retVal = validatePassword()
-                                }
-                                return retVal;
-                            }
-
-                            function validateUser() {
-                                let x = document.forms["signupform"]["signup_userid"].value;
-                                if (x == "") {
-                                    alert("Name must be filled out");
-                                    return false;
-                                }
-                                else if (x.length<5) {
-                                    alert("Name must consist of at least 5 letters");
-                                    return false;
-                                }
-                                else {
-                                    return true;
-                                }
-                            }
-
-                            function validatePassword() {
-                                let x = document.forms["signupform"]["signup_passwordid"].value;
-                                if (x == "") {
-                                    alert("Password must be filled in");
-                                    return false;
-                                }
-                                else if (x.length<5) {
-                                    alert("Password must consist of at least 5 letters");
-                                    return false;
-                                }
-                                else {
-                                    return true;
-                                }
-                            }
-		                </script>
+                    <div class="signup">
+                        <h2>Sign Up <i class="fa-solid fa-address-card right"></i></h2>
 					    <input type="text" name="signup_usernameid" id="signup_usernameid" value="" placeholder="username . . ." />
-                        <div class="signup_username_check"><button>Check</button></div>
+                        <!--<div class="signup_username_check"><button>Check</button></div>-->
 
                         <input type="text" name="signup_passwordid" id="signup_passwordid" value="" placeholder="password . . ." />
-                        <div class="signup_password_check"><button>Check</button></div>
 
                         <input type="email" name="signup_emailid" id="signup_emailid" value="" placeholder="email . . ." />
-                        <input type="submit" value="send">
+                        <!--<input type="submit" value="Sign in">-->
+                        <div class="signup_password_check"><button>Sign in</button></div>
                     </div>
-                <input type="hidden" id="FormIdentifier" name="FormIdentifier" value="signup_form">
+                    <input type="hidden" id="FormIdentifier" name="FormIdentifier" value="signup_form">
                 </form>
                 <div class="login_status">
                     <!-- LOGIN_STATUS -->

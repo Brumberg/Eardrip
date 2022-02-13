@@ -18,6 +18,7 @@ def StartupServer():
     EarDripServer.RegisterForm(b'signup_form', python.webserver.formhandler.SignupHandler())
     EarDripServer.RegisterForm(b'profile_form', python.webserver.formhandler.ProfileHandler())
     EarDripServer.RegisterForm(b'algorithm_button_form', python.webserver.formhandler.AlgorithmHandler())
+    EarDripServer.RegisterForm(b'how_to_use_form', python.webserver.formhandler.HowToUseForm())
     SessionManager.StartScheduer()
     server = python.webserver.HTTPWebServer()
     server.Initialize("localhost", 8080)
