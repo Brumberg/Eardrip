@@ -566,6 +566,36 @@ class AlgorithmHandler(GenericFormHandler):
     """
     m_Spy = None
 
+    m_HTMLHeaderLine = (
+        '<tr>'
+        '<td>artist</td>'
+        '<td>title</td>'
+        '<td>track id</td>'
+        '<td>genre</td>'
+        '<td>popularity</td>'
+        '</tr>'
+        '<!-- header_attachment_anchor -->'
+    )
+    m_HTMLTableRowDescriptor = (
+        '<tr>'
+        '<td>ARTIST_ID</td>'
+        '<td>TITLE_ID</td>'
+        '<td>TRACK_ID</td>'
+        '<td>GENRE_ID</td>'
+        '<td>POPULARITY</td>'
+        '<input type="hidden" id="FormIdentifier" name="FormIdentifier" value="trackselection_form">'
+        '<input type="hidden" id="userID_NUMBER" name="userID_NUMBER" value="USERID">'
+        '<input type="hidden" value="TRACK_ID" name="field_track_id_NUMBER" id="field_track_id_NUMBER">'
+        '<input type="hidden" value="ARTIST_ID" name="field_artist_id_NUMBER" id="field_artist_id_NUMBER">'
+        '<input type="hidden"value="TITLE_ID" name="field_title_id_NUMBER" id="field_title_id_NUMBER">'
+        '<input type="hidden"value="TRACK_HREF" name="field_track_href_NUMBER" id="field_trackhref_NUMBER">'
+        '</tr>'
+    )
+    m_HTMLTableResponse = (
+        '<table style="width:100%">'
+        '<!-- table_content_anchor -->'
+        '</table>'
+    )
     def __init__(self):
         """Constructor, resets the form handler dictionary
 
@@ -573,7 +603,7 @@ class AlgorithmHandler(GenericFormHandler):
         :rtype: -
 
         """
-        self.m_ParameterSet = None
+        super().__init__()
 
     def __del__(self):
         """Destructor, resets the form handler dictionary
@@ -582,7 +612,20 @@ class AlgorithmHandler(GenericFormHandler):
         :rtype: -
 
         """
-        self.m_ParameterSet = None
+        super().__del__()
+
+    def GetParameterSet(self, session_id: int, param_set: dict):
+        """extract parameter set and store it
+
+        :param session_id: unique identifier representing the session
+        :type: uuid
+        :param param_set: set of parameters received from the user
+        :type: dict
+        :return: -
+        :rtype: -
+
+        """
+        super().GetParameterSet(session_id, param_set)
 
     def RegisterProfile(self, profile_info):
         """Register profile object
@@ -645,7 +688,7 @@ class AlgorithmHandler(GenericFormHandler):
         self.m_ProfileInfo = SessionManager.GetSessionContext(session_id)
         #self.m_user_tracks_selected
 
-    def SpotifyFilter(self):
+    def SpotifyFilter(self) -> (bool, str):
 
         retVal, track_selected_list = self.m_TrackAttributesAccessInterface.read(self.m_ProfileInfo["userID"])
 
@@ -672,12 +715,41 @@ class AlgorithmHandler(GenericFormHandler):
 
         sorted_cycled_genres = sorted(cycled_genres.items(), key = lambda x:x[1], reverse = True)
 
-        print(sorted_cycled_genres)
-
         top_genre = sorted_cycled_genres[0][0]
-        print(top_genre)
 
-        return retVal, file_content
+        return retVal, top_genre
+    
+    @classmethod
+    def FillInHTMLForm(cls, top_genre) -> str:
+        """
+
+        :param track_data: contain list of tracks
+        :type: list
+        :param artist_info: related artist attributes
+        :type: list
+        :param track_analysis: extended track attributes
+        :type: list
+        :return: string containing filled in html table
+        :rtype: string
+        """
+        recomendation_list = str()
+
+        for i in range(0, len(top_genre)):
+            table_row = TrackSelectionHandler.m_HTMLTableRowDescriptor
+            table_row = table_row.replace('ARTIST_ID', top_genre[i]['artist'])
+            table_row = table_row.replace('TITLE_ID', top_genre[i]['track'])
+            table_row = table_row.replace('TRACK_HREF', str(top_genre[i]['artist_uri']))
+
+            recomendation_list = recomendation_list + table_row
+
+        table_header = TrackSelectionHandler.m_HTMLHeaderLine
+        table_header = table_header.replace('<!-- header_attachment_anchor -->', recomendation_list)
+
+        table = TrackSelectionHandler.m_HTMLTableResponse
+        table = table.replace('<!-- table_content_anchor -->', table_header)
+
+        return table
+
     @abstractmethod
     def CreateResponse(self) -> Tuple[bool, str]:
         """create html response
@@ -686,10 +758,15 @@ class AlgorithmHandler(GenericFormHandler):
         :rtype: boolean, string
 
         """
+        genre_name = self.SpotifyFilter()
+        top_genre = self.m_Spy.GetAttributes(genre = genre_name[1])
 
+        recomendation_table = AlgorithmHandler.FillInHTMLForm(top_genre)
 
+        file_content = open('./html/homepage.html').read()
+        file_content = file_content.replace("<!-- homepage_recomendation_table -->", recomendation_table)
 
-        return self.SpotifyFilter()
+        return self.SpotifyFilter(), file_content
 
 class LoginHandler(GenericFormHandler):
     def __init__(self):
@@ -834,7 +911,6 @@ class SignupHandler(GenericFormHandler):
         :rtype: boolean, string
 
         """
-        file_content = []
         if b'signup_usernameid' not in self.m_ParameterSet or b'signup_passwordid' not in self.m_ParameterSet or b'signup_emailid' not in self.m_ParameterSet:
             logging.error('Username or password undefined')
             self.m_ProfileInfo['validate'] = False

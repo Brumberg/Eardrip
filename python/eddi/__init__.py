@@ -198,7 +198,7 @@ class Eddi:
             cursor.reset()
 
             if selectedtracks == None:
-                return False
+                return False, param_set
             else:
 
                 for x in selectedtracks:

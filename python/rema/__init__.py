@@ -43,7 +43,7 @@ class remotedatabase():
         return artist_info_list
 
     def GetAttributes(self, track=None, artist=None, genre=None, max_no_tracks=10, packet_size=5):
-        """GetAttributes return a list of attributes from the spotify playlist. They are finally being used to optimize
+        """GetAttributes return a list of attributes from the spotify playlist. They are then being used to optimize
         the recommendation algorithm.
 
         :param track:   list of track names
