@@ -18,6 +18,21 @@
         <link rel="stylesheet" href="../CSS/index_style.css">
     </head>
 
+    <script>
+
+        function open_modal() {
+            el = document.getElementById("modal");
+            el.style.visibility = "visible";
+            el.style.opacity = 1;
+
+        }
+
+        function close_modal() {
+            el = document.getElementById("modal");
+            el.style.visibility = "hidden";
+            el.style.opacity = 0;
+        }
+    </script>
     <body>
         <div>
             <!--logo,login/sign up and profile navigaton-->
@@ -27,7 +42,7 @@
                     <div class="menu">
                             <a href="homepage.html"><button>Homepage</button></a>
 
-                            <a href="howtouse.html"><button>How To Use</button></a>
+                            <a href="#" onclick="open_modal()"><button>How To Use</button></a>
 
                         <form name="profileform" action="" method="post">
                             <a href="profile.html"><button class="profile-button">Profile</button></a>
@@ -57,6 +72,7 @@
         </div>
 
         <!-- tables -->
+        <div class="small-spacer"></div>
         <div class="recommendation_results"
              <table>
                 <!-- homepage_recomendation_table -->
@@ -73,6 +89,30 @@
             <table>
                 <!-- homepage_result_table -->
             </table>
+        </div>
+        <div class="modal" onclick="close_modal()" id="modal">
+            <div class="spacer"></div>
+                <div class="content">
+                    <h1>HOW TO USE GUIDE</h1>
+
+                    <p><h2>SEARCHBAR:</h2>
+                    Once you have logged in, click on the searchbar in the centre of the screen and type in your favourite song (the algorithm is heavily based on genre so if you wish to be recomended a pop song, please make sure you enter in your favourite pop song)
+                    Press enter after you have entered in your song name. A table should appear on the home screen where you will see multiple songs with the name you entered. Proceed to press "like" next to the correct song. Note: you can see the artist name and genre next to the song to help you select the correct song.
+                    From here, you can either press the "start algorithm" button, or you can enter in another song name. The more songs that you select, the more accurately the algorithm will be able to recomend you similar songs! After your first song selection, a table will appear above the search results to let you know which songs you have selected.
+                    </p><br>
+
+                    <p><h2>START ALGORITHM:</h2>
+                    Pressing the "Start Algorithm button will start the algorithm and display a table on the homepage for you with similar tracks which you may like. Its that easy!
+                    </p><br>
+
+                    <p><h2>PROFILE:</h2>
+                    If you want to see your profile details, press the "profile" button in the navigation bar to accees your profile page. Here you will have all of your profile infomation displayed.
+                    </p><br>
+
+                    <p><h2>LOGIN AND SIGN UP:</h2>
+                    Enter your username and password to login, or create an account by choosing a username with or more than 5 characters, a password and your email. Pressing enter after entering your details in the login/ signup will sign you in.
+                    </p>
+                </div>
         </div>
     </body>
 

@@ -136,6 +136,10 @@ input {
     color: white;
 }
 
+.selected_tracks button {
+    color: #181818;
+}
+
 /* homepage search bar results */
 .search_results td {
     color: white;
@@ -225,5 +229,23 @@ table td{
 }
 
 table tr:nth-child(even) {
-    background: #550000;
+    background: #CD5C5C;
+}
+
+
+a {
+    color: white;
+}
+
+.modal {
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.4);
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s, opacity 0.5s linear;
+    position: absolute;
+    top: 0;
+    z-index: 1001;
+
 }

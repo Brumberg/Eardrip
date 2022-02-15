@@ -127,6 +127,8 @@ class EarDripServer(BaseHTTPRequestHandler):
                     self.path = './html/index.html'
                 elif self.path == '/index.html':
                     self.path = './html/index.html'
+                elif self.path == '/howtouse.html':
+                    self.path = './html/howtouse.html'
                 elif not self.m_ProfileInfo['validity']:
                     self.path = './html/index.html'
                     set_access_denied_message = True

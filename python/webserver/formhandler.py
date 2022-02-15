@@ -6,6 +6,7 @@ import time
 import logging
 import logging.handlers
 import re
+import math
 
 
 class GenericFormHandler:
@@ -551,9 +552,9 @@ class AlgorithmHandler(GenericFormHandler):
 
     m_HTMLHeaderLine = (
         '<tr>'
-        '<td>artist</td>'
-        '<td>title</td>'
-        '<td>track id</td>'
+        '<td>Artist</td>'
+        '<td>Title</td>'
+        '<td>Play</td>'
         '</tr>'
         '<!-- header_attachment_anchor -->'
     )
@@ -561,7 +562,7 @@ class AlgorithmHandler(GenericFormHandler):
         '<tr>'
         '<td>ARTIST_ID</td>'
         '<td>TITLE_ID</td>'
-        '<td><a href= "https://open.spotify.com/track/TRACK_ID" target="_blank">TITLE_ID</a></td>'
+        '<td><a href= "https://open.spotify.com/track/TRACK_ID" target="_blank"><i class="fa-solid fa-circle-play"></i></a></td>'
         '<input type="hidden" id="FormIdentifier" name="FormIdentifier" value="trackselection_form">'
         '<input type="hidden" id="userID_NUMBER" name="userID_NUMBER" value="USERID">'
         '<input type="hidden" value="TRACK_ID" name="field_track_id_NUMBER" id="field_track_id_NUMBER">'
@@ -672,19 +673,17 @@ class AlgorithmHandler(GenericFormHandler):
         retVal, track_selected_list = self.m_TrackAttributesAccessInterface.read(self.m_ProfileInfo["userID"])
 
         cycled_genres = {}
-        most_popular_genre = ()
-        most_popular_genre_count = ()
         genre_list = []
         genre_list_temp = []
 
-        for i in track_selected_list:
-            returned_genres = (i["field_genre_id"])
+        for row in track_selected_list:
+            returned_genres = (row["field_genre_id"])
             genre_list_temp = returned_genres.split(",")
             genre_list = genre_list + genre_list_temp
 
-        for z in genre_list:
+        for iteration in genre_list:
 
-            current_genre = z
+            current_genre = iteration
             if current_genre not in cycled_genres:
                 cycled_genres[current_genre] = 1
 
@@ -695,10 +694,42 @@ class AlgorithmHandler(GenericFormHandler):
 
         top_genre = sorted_cycled_genres[0][0]
 
-        return retVal, top_genre
+
+        # POPULARITY BRACKETS
+        # popularity scale 1-19
+        # popularity scale 20-39
+        # popularity scale 40-59
+        # popularity scale 60-79
+        # popularity scale 80-100
+
+
+        real_popularity_bracket = ()
+        popularity_list = []
+        popularity_tracks_list = []
+
+        counter = (0)
+        total = (0)
+        number = ()
+
+        for abc in track_selected_list:
+            number = int(abc["field_popularity"])
+            total = (total + number)
+            counter = (counter + 1)
+
+        average_popularity = (total / counter)
+        print(average_popularity)
+
+        lower_bound = ()
+
+        relational_average = (average_popularity / 25)
+        lower_bound = (math.floor(relational_average) * 25)
+        upper_bound = ((math.floor(relational_average) + 1) * 25)
+
+
+        return retVal, top_genre, lower_bound, upper_bound
     
     @classmethod
-    def FillInHTMLForm(cls, top_genre) -> str:
+    def FillInHTMLForm(cls, recomendation_algorithm_tracks) -> str:
         """
 
         :param track_data: contain list of tracks
@@ -712,11 +743,11 @@ class AlgorithmHandler(GenericFormHandler):
         """
         recomendation_list = str()
 
-        for i in range(0, len(top_genre)):
+        for i in range(0, len(recomendation_algorithm_tracks)):
             table_row = AlgorithmHandler.m_HTMLTableRowDescriptor
-            table_row = table_row.replace('ARTIST_ID', top_genre[i]['artist'])
-            table_row = table_row.replace('TITLE_ID', top_genre[i]['track'])
-            table_row = table_row.replace('TRACK_ID', str(top_genre[i]['track_id']))
+            table_row = table_row.replace('ARTIST_ID', recomendation_algorithm_tracks[i]['artist'])
+            table_row = table_row.replace('TITLE_ID', recomendation_algorithm_tracks[i]['track'])
+            table_row = table_row.replace('TRACK_ID', str(recomendation_algorithm_tracks[i]['track_id']))
 
             recomendation_list = recomendation_list + table_row
 
@@ -737,9 +768,15 @@ class AlgorithmHandler(GenericFormHandler):
 
         """
         genre_name = self.SpotifyFilter()
-        top_genre = self.m_Spy.GetAttributes(genre = genre_name[1])
+        recomendation_algorithm_tracks = self.m_Spy.GetAttributes(genre = genre_name[1], max_no_tracks= 100)
 
-        recomendation_table = AlgorithmHandler.FillInHTMLForm(top_genre)
+        filtered_algorithm_tracks = []
+
+        for track in recomendation_algorithm_tracks:
+            if int(track["popularity"]) > (genre_name[2]) and int(track["popularity"]) < (genre_name[3]):
+                filtered_algorithm_tracks.append(track)
+
+        recomendation_table = AlgorithmHandler.FillInHTMLForm(filtered_algorithm_tracks)
 
         file_content = open('./html/homepage.html').read()
         file_content = file_content.replace("<!-- homepage_recomendation_table -->", recomendation_table)
@@ -993,7 +1030,7 @@ class ProfileHandler(GenericFormHandler):
         '</tr>'
     )
     m_HTMLTableResponse = (
-        '<table style="width:100%">'
+        '<table style="width:60%">'
         '<!-- table_content_anchor -->'
         '</table>'
     )
